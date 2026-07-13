@@ -1,25 +1,20 @@
 import type { Locale } from "@/shared/i18n/config";
-import { getDictionary } from "@/shared/i18n/getDictionary";
-import { getMenu, MenuBoard } from "@/features/menu";
+import { getMenu, MenuManager } from "@/features/menu";
 
 /**
- * Dashboard menu management. Thin composition root: resolve params, call the
- * feature use-case, render the feature UI. (Editing UI is a follow-up.)
+ * Dashboard menu management. Thin composition root: resolve the menu for the
+ * user's restaurant, then render the client CRUD manager. (Data source is the
+ * in-memory mock until `MENUNOVA_DATA_MODE=live` wires the real API.)
  */
+const RESTAURANT_SLUG = "demo"; // TODO: derive from the authenticated user's restaurant
+
 export default async function DashboardMenuPage({
   params,
 }: {
   params: Promise<{ locale: string }>;
 }) {
-  const { locale } = (await params) as { locale: Locale };
-  const t = await getDictionary(locale);
-  // In the real app the slug comes from the authenticated user's restaurant.
-  const menu = await getMenu("demo");
+  void ((await params) as { locale: Locale });
+  const menu = await getMenu(RESTAURANT_SLUG);
 
-  return (
-    <section className="flex flex-col gap-6">
-      <h1 className="text-2xl font-semibold">{t.dashboard.menu}</h1>
-      <MenuBoard menu={menu} locale={locale} emptyLabel={t.menu.empty} />
-    </section>
-  );
+  return <MenuManager menu={menu} slug={RESTAURANT_SLUG} />;
 }

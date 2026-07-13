@@ -1,12 +1,29 @@
 import { httpClient } from "@/shared/http/httpClient";
-import type { Menu, MenuItem, MenuItemId } from "@/features/menu/domain/menu.entity";
+import type {
+  Category,
+  CategoryDraft,
+  CategoryId,
+  CategoryPatch,
+  Menu,
+  MenuItem,
+  MenuItemDraft,
+  MenuItemId,
+  MenuItemPatch,
+} from "@/features/menu/domain/menu.entity";
 import type { MenuRepository } from "@/features/menu/domain/menu.ports";
-import { toMenu, type MenuDto } from "@/features/menu/infrastructure/menu.mapper";
+import {
+  toCategory,
+  toItem,
+  toMenu,
+  type CategoryDto,
+  type ItemDto,
+  type MenuDto,
+} from "@/features/menu/infrastructure/menu.mapper";
 
 /**
  * HTTP implementation of {@link MenuRepository} against the separate backend.
  * Implements the domain port; nothing in domain/application imports this file
- * directly — it is wired in at the composition edge (see application layer).
+ * directly — it is wired in at the composition edge (see `menu.repository.ts`).
  */
 export class HttpMenuRepository implements MenuRepository {
   async getByRestaurantSlug(slug: string): Promise<Menu | null> {
@@ -17,27 +34,62 @@ export class HttpMenuRepository implements MenuRepository {
     return toMenu(dto);
   }
 
-  async updateItem(
-    id: MenuItemId,
-    patch: Partial<Pick<MenuItem, "name" | "description" | "price" | "available">>,
-    token: string,
-  ): Promise<MenuItem> {
-    const dto = await httpClient.patch<MenuDto["items"][number]>(
-      `/menu-items/${encodeURIComponent(id)}`,
-      patch,
+  async createItem(slug: string, draft: MenuItemDraft, token: string): Promise<MenuItem> {
+    const dto = await httpClient.post<ItemDto>(
+      `/restaurants/${encodeURIComponent(slug)}/menu-items`,
+      itemBody(draft),
       { token },
     );
-    return {
-      id: dto.id,
-      categoryId: dto.category_id,
-      name: dto.name,
-      description: dto.description,
-      price: { amountMinor: dto.price_minor, currency: dto.currency },
-      available: dto.available,
-      imageUrl: dto.image_url ?? undefined,
-    };
+    return toItem(dto);
+  }
+
+  async updateItem(id: MenuItemId, patch: MenuItemPatch, token: string): Promise<MenuItem> {
+    const dto = await httpClient.patch<ItemDto>(
+      `/menu-items/${encodeURIComponent(id)}`,
+      itemBody(patch),
+      { token },
+    );
+    return toItem(dto);
+  }
+
+  async deleteItem(id: MenuItemId, token: string): Promise<void> {
+    await httpClient.delete<void>(`/menu-items/${encodeURIComponent(id)}`, { token });
+  }
+
+  async createCategory(slug: string, draft: CategoryDraft, token: string): Promise<Category> {
+    const dto = await httpClient.post<CategoryDto>(
+      `/restaurants/${encodeURIComponent(slug)}/categories`,
+      { name: draft.name, position: draft.position },
+      { token },
+    );
+    return toCategory(dto);
+  }
+
+  async updateCategory(id: CategoryId, patch: CategoryPatch, token: string): Promise<Category> {
+    const dto = await httpClient.patch<CategoryDto>(
+      `/categories/${encodeURIComponent(id)}`,
+      { name: patch.name, position: patch.position },
+      { token },
+    );
+    return toCategory(dto);
+  }
+
+  async deleteCategory(id: CategoryId, token: string): Promise<void> {
+    await httpClient.delete<void>(`/categories/${encodeURIComponent(id)}`, { token });
   }
 }
 
-/** Default repository instance used by the application layer. */
-export const menuRepository: MenuRepository = new HttpMenuRepository();
+/** Domain item draft/patch → backend snake_case body (only defined fields sent). */
+function itemBody(patch: MenuItemPatch): Record<string, unknown> {
+  const body: Record<string, unknown> = {};
+  if (patch.categoryId !== undefined) body.category_id = patch.categoryId;
+  if (patch.name !== undefined) body.name = patch.name;
+  if (patch.description !== undefined) body.description = patch.description;
+  if (patch.price !== undefined) {
+    body.price_minor = patch.price.amountMinor;
+    body.currency = patch.price.currency;
+  }
+  if (patch.available !== undefined) body.available = patch.available;
+  if (patch.imageUrl !== undefined) body.image_url = patch.imageUrl ?? null;
+  return body;
+}

@@ -1,6 +1,6 @@
 import type { Menu } from "@/features/menu/domain/menu.entity";
 import type { MenuRepository } from "@/features/menu/domain/menu.ports";
-import { menuRepository } from "@/features/menu/infrastructure/menu.http.repository";
+import { menuRepository } from "@/features/menu/infrastructure/menu.repository";
 
 /**
  * Query use-case: fetch a restaurant's menu for public display.

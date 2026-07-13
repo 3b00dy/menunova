@@ -6,7 +6,7 @@ import type { Plan } from "@/features/billing/domain/plan.entity";
  */
 export async function listPlans(): Promise<Plan[]> {
   return [
-    { id: "free", name: "Free", price: { amountMinor: 0, currency: "SAR" }, features: ["1 menu"] },
-    { id: "pro", name: "Pro", price: { amountMinor: 9900, currency: "SAR" }, features: ["Unlimited menus", "Custom branding"] },
+    { id: "free", name: "Free", price: { amountMinor: 0, currency: "IQD" }, features: ["1 menu"] },
+    { id: "pro", name: "Pro", price: { amountMinor: 9900, currency: "IQD" }, features: ["Unlimited menus", "Custom branding"] },
   ];
 }

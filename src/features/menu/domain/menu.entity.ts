@@ -32,3 +32,25 @@ export interface Menu {
   categories: Category[];
   items: MenuItem[];
 }
+
+/** Fields required to create a menu item (id/category assignment happen server-side). */
+export interface MenuItemDraft {
+  categoryId: CategoryId;
+  name: string;
+  description: string;
+  price: Money;
+  available: boolean;
+  imageUrl?: string;
+}
+
+/** Partial update for an existing item — any subset of its editable fields. */
+export type MenuItemPatch = Partial<MenuItemDraft>;
+
+/** Fields to create a category. `position` defaults to "append last" when omitted. */
+export interface CategoryDraft {
+  name: string;
+  position?: number;
+}
+
+/** Partial update for an existing category. */
+export type CategoryPatch = Partial<Pick<Category, "name" | "position">>;

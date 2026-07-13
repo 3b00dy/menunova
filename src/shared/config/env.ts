@@ -23,6 +23,12 @@ export const env = {
     "http://localhost:4000",
   ),
   isProduction: process.env.NODE_ENV === "production",
+  /**
+   * Where feature data comes from. `"mock"` (default) uses in-memory
+   * repositories so the app is fully usable without the backend (demos, local
+   * dev). Set `MENUNOVA_DATA_MODE=live` to talk to the real API.
+   */
+  dataMode: process.env.MENUNOVA_DATA_MODE === "live" ? "live" : "mock",
 } as const;
 
 export type Env = typeof env;

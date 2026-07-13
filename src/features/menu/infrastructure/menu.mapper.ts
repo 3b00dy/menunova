@@ -20,11 +20,14 @@ export interface MenuDto {
   }>;
 }
 
-function toCategory(dto: MenuDto["categories"][number]): Category {
+export type ItemDto = MenuDto["items"][number];
+export type CategoryDto = MenuDto["categories"][number];
+
+export function toCategory(dto: CategoryDto): Category {
   return { id: dto.id, name: dto.name, position: dto.position };
 }
 
-function toItem(dto: MenuDto["items"][number]): MenuItem {
+export function toItem(dto: ItemDto): MenuItem {
   return {
     id: dto.id,
     categoryId: dto.category_id,

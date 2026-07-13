@@ -4,7 +4,7 @@ import type { Locale } from "@/shared/i18n/config";
 export interface Money {
   /** Amount in the currency's minor unit (integer). */
   amountMinor: number;
-  /** ISO 4217 code, e.g. "SAR", "USD". */
+  /** ISO 4217 code, e.g. "IQD", "USD". */
   currency: string;
 }
 
