@@ -15,10 +15,83 @@
     "menu": "Menu",
     "restaurant": "Restaurant",
     "staff": "Staff",
-    "billing": "Billing"
+    "billing": "Billing",
+    "themeBuilder": "Theme Builder"
   },
   "menu": {
     "empty": "No menu items yet.",
-    "category": "Category"
+    "category": "Category",
+    "categories": "Categories",
+    "openNow": "Open now",
+    "soldOut": "Sold out",
+    "calories": "kcal",
+    "prepTime": "min",
+    "addOns": "Add-ons",
+    "addToCart": "Add",
+    "promotions": "Promotions",
+    "back": "Back",
+    "close": "Close",
+    "language": "Language",
+    "layout": "View",
+    "layoutCategories": "Categories only",
+    "layoutNav": "Nav + items",
+    "layoutSidebar": "Sidebar + items"
+  },
+  "themeBuilder": {
+    "title": "Theme Builder",
+    "subtitle": "Customize how your public menu looks. Every change previews live.",
+    "reset": "Reset to default",
+    "sections": {
+      "presets": "Admin presets",
+      "presetsHint": "Start from a system theme, then fine-tune.",
+      "brandAssets": "Brand assets",
+      "languages": "Languages",
+      "brandColors": "Brand colors",
+      "typography": "Typography",
+      "components": "Components"
+    },
+    "fields": {
+      "logoUrl": "Logo URL",
+      "coverImageUrl": "Cover image URL",
+      "defaultLanguage": "Default language",
+      "supportedLanguages": "Supported languages",
+      "background": "Background",
+      "primary": "Primary",
+      "secondary": "Secondary",
+      "text": "Text",
+      "headingFont": "Heading font",
+      "bodyFont": "Body font",
+      "layout": "Layout",
+      "borderRadius": "Border radius",
+      "shadow": "Shadow",
+      "buttonStyle": "Button style"
+    },
+    "options": {
+      "categories": "Categories",
+      "nav": "Top nav + items",
+      "sidebar": "Sidebar + items",
+      "solid": "Solid",
+      "outline": "Outline",
+      "none": "None",
+      "sm": "Small",
+      "md": "Medium",
+      "lg": "Large",
+      "full": "Full"
+    },
+    "preview": {
+      "device": "Live preview",
+      "sampleMenu": "Sample menu",
+      "addToCart": "Add",
+      "openNow": "Open now",
+      "hours": "Hours",
+      "soldOut": "Sold out",
+      "calories": "kcal",
+      "prepTime": "min",
+      "addOns": "Add-ons",
+      "categories": "Categories",
+      "promotions": "Promotions",
+      "back": "Back",
+      "close": "Close"
+    }
   }
 }

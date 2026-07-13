@@ -3,6 +3,7 @@
 import {
   LayoutDashboard,
   UtensilsCrossed,
+  Palette,
   Store,
   Users,
   CreditCard,
@@ -21,6 +22,7 @@ function useNavItems(): NavItem[] {
   return [
     { href: routes.dashboard(locale), label: t.dashboard.title, icon: LayoutDashboard, end: true },
     { href: routes.dashboardMenu(locale), label: t.dashboard.menu, icon: UtensilsCrossed },
+    { href: routes.dashboardTheme(locale), label: t.dashboard.themeBuilder, icon: Palette },
     { href: routes.dashboardRestaurant(locale), label: t.dashboard.restaurant, icon: Store },
     { href: routes.dashboardStaff(locale), label: t.dashboard.staff, icon: Users },
     { href: routes.dashboardBilling(locale), label: t.dashboard.billing, icon: CreditCard },

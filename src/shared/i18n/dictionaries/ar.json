@@ -15,10 +15,83 @@
     "menu": "القائمة",
     "restaurant": "المطعم",
     "staff": "الموظفون",
-    "billing": "الفوترة"
+    "billing": "الفوترة",
+    "themeBuilder": "منشئ الأنماط"
   },
   "menu": {
     "empty": "لا توجد أصناف في القائمة بعد.",
-    "category": "التصنيف"
+    "category": "التصنيف",
+    "categories": "التصنيفات",
+    "openNow": "مفتوح الآن",
+    "soldOut": "نفد",
+    "calories": "سعرة",
+    "prepTime": "دقيقة",
+    "addOns": "الإضافات",
+    "addToCart": "أضِف",
+    "promotions": "العروض",
+    "back": "رجوع",
+    "close": "إغلاق",
+    "language": "اللغة",
+    "layout": "العرض",
+    "layoutCategories": "التصنيفات فقط",
+    "layoutNav": "شريط + أصناف",
+    "layoutSidebar": "جانبي + أصناف"
+  },
+  "themeBuilder": {
+    "title": "منشئ الأنماط",
+    "subtitle": "خصّص مظهر قائمتك العامة. كل تغيير يظهر في المعاينة فورًا.",
+    "reset": "إعادة للوضع الافتراضي",
+    "sections": {
+      "presets": "الأنماط الجاهزة",
+      "presetsHint": "ابدأ من نمط جاهز ثم اضبطه بدقّة.",
+      "brandAssets": "أصول العلامة",
+      "languages": "اللغات",
+      "brandColors": "ألوان العلامة",
+      "typography": "الخطوط",
+      "components": "المكوّنات"
+    },
+    "fields": {
+      "logoUrl": "رابط الشعار",
+      "coverImageUrl": "رابط صورة الغلاف",
+      "defaultLanguage": "اللغة الافتراضية",
+      "supportedLanguages": "اللغات المدعومة",
+      "background": "الخلفية",
+      "primary": "الأساسي",
+      "secondary": "الثانوي",
+      "text": "النص",
+      "headingFont": "خط العناوين",
+      "bodyFont": "خط النص",
+      "layout": "التخطيط",
+      "borderRadius": "استدارة الحواف",
+      "shadow": "الظل",
+      "buttonStyle": "نمط الأزرار"
+    },
+    "options": {
+      "categories": "التصنيفات",
+      "nav": "شريط علوي + أصناف",
+      "sidebar": "شريط جانبي + أصناف",
+      "solid": "مصمت",
+      "outline": "محدّد",
+      "none": "بدون",
+      "sm": "صغير",
+      "md": "متوسط",
+      "lg": "كبير",
+      "full": "كامل"
+    },
+    "preview": {
+      "device": "معاينة مباشرة",
+      "sampleMenu": "قائمة تجريبية",
+      "addToCart": "أضِف",
+      "openNow": "مفتوح الآن",
+      "hours": "ساعات العمل",
+      "soldOut": "نفد",
+      "calories": "سعرة",
+      "prepTime": "دقيقة",
+      "addOns": "الإضافات",
+      "categories": "التصنيفات",
+      "promotions": "العروض",
+      "back": "رجوع",
+      "close": "إغلاق"
+    }
   }
 }

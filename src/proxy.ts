@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { locales, defaultLocale, isLocale } from "@/shared/i18n/config";
-import { SESSION_COOKIE } from "@/shared/auth/getServerSession";
+// TEMP: dashboard auth gating disabled below — restore this import with it.
+// import { SESSION_COOKIE } from "@/shared/auth/getServerSession";
 
 /**
  * Proxy (Next.js 16's renamed middleware; runs on the Node.js runtime).
@@ -44,14 +45,15 @@ export function proxy(request: NextRequest): NextResponse {
   }
 
   // 2. Dashboard auth gating (coarse; defense-in-depth is in the app layer).
-  const segments = pathname.split("/");
-  const isDashboard = segments[2] === "dashboard";
-  if (isDashboard && !request.cookies.get(SESSION_COOKIE)) {
-    const locale = segments[1] || defaultLocale;
-    const url = request.nextUrl.clone();
-    url.pathname = `/${locale}/login`;
-    return NextResponse.redirect(url);
-  }
+  // TEMPORARILY DISABLED for local exploration — restore before shipping.
+  // const segments = pathname.split("/");
+  // const isDashboard = segments[2] === "dashboard";
+  // if (isDashboard && !request.cookies.get(SESSION_COOKIE)) {
+  //   const locale = segments[1] || defaultLocale;
+  //   const url = request.nextUrl.clone();
+  //   url.pathname = `/${locale}/login`;
+  //   return NextResponse.redirect(url);
+  // }
 
   return NextResponse.next();
 }

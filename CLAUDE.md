@@ -42,6 +42,7 @@ Each feature has `domain/` (entities, rules, **ports/interfaces** — no React/f
 ### Shared layer (`src/shared`) — importable by everyone, imports no feature
 - `http/httpClient.ts` — the only place that calls `fetch`; base URL + auth header + `ApiError` normalization. Feature infrastructure builds on it.
 - `i18n/` — `config.ts` is the source of truth for `locales` (`en`, `ar`) and `dir()`. Dictionaries are **server-loaded** (`getDictionary`) and handed to Client Components via `I18nProvider` (`useI18n`/`useTranslations`) — no client-side i18n fetching. Adding a locale = add to `config.ts` + a `dictionaries/<locale>.json`.
+- **Bilingual rule (always):** every user-facing string must be supplied in **both English and Arabic** — the app supports `en` + `ar` and is RTL-first. This applies to dictionaries (`dictionaries/en.json` **and** `dictionaries/ar.json`) and to any content data keyed by locale (e.g. `features/marketing/infrastructure/landing.mock.ts` has parallel `en`/`ar` objects). Never add copy to one language only; keep the two in sync (same keys/shape).
 - `theme/` + `ui/styles/globals.css` — see Theming below.
 - `config/routes.ts` — locale-aware URL builders; prefer over hardcoded paths.
 - `auth/getServerSession.ts` — thin cookie read shared by `proxy.ts` and layouts; real role logic lives in the `auth` feature.
