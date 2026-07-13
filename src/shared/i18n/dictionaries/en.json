@@ -1,0 +1,24 @@
+{
+  "common": {
+    "appName": "MenuNova",
+    "getStarted": "Get started",
+    "signIn": "Sign in",
+    "loading": "Loading…"
+  },
+  "marketing": {
+    "heroTitle": "Beautiful digital menus for every restaurant",
+    "heroSubtitle": "Create, translate, and share your menu in minutes.",
+    "seePricing": "See pricing"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "menu": "Menu",
+    "restaurant": "Restaurant",
+    "staff": "Staff",
+    "billing": "Billing"
+  },
+  "menu": {
+    "empty": "No menu items yet.",
+    "category": "Category"
+  }
+}

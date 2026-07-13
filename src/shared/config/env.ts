@@ -1,0 +1,28 @@
+/**
+ * Typed, centralized environment access.
+ *
+ * Only `NEXT_PUBLIC_`-prefixed vars are available on the client (Next.js 16).
+ * Keep server-only secrets out of anything imported by client components.
+ *
+ * Later: swap the manual reads for zod validation (see plan's optional follow-ups).
+ */
+
+function required(name: string, value: string | undefined, fallback?: string): string {
+  const resolved = value ?? fallback;
+  if (resolved === undefined || resolved === "") {
+    throw new Error(`Missing required environment variable: ${name}`);
+  }
+  return resolved;
+}
+
+export const env = {
+  /** Base URL of the separate backend API service. */
+  apiUrl: required(
+    "NEXT_PUBLIC_API_URL",
+    process.env.NEXT_PUBLIC_API_URL,
+    "http://localhost:4000",
+  ),
+  isProduction: process.env.NODE_ENV === "production",
+} as const;
+
+export type Env = typeof env;

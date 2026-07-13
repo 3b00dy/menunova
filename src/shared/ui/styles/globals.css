@@ -1,0 +1,115 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@400;500;600;700&family=Manrope:wght@400;500;600;700&family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@400;600;700&family=Cormorant+Garamond:wght@400;500;600;700&family=Cairo:wght@400;500;600;700&family=Tajawal:wght@400;500;700&family=Almarai:wght@400;700&display=swap');
+@import "tailwindcss";
+
+/* Default theme tokens — overridden per tenant by ThemeProvider at runtime.
+   Customer-facing components must read these CSS variables (never hardcode colors). */
+:root {
+  /* MenuNova brand palette — Dark Navy primary, Emerald accent, Canvas White. */
+  --color-primary: 15 23 42;
+  --color-primary-fg: 255 255 255;
+  --color-secondary: 22 163 74;
+  --color-accent: 5 150 105;
+  --color-bg: 255 255 255;
+  --color-surface: 248 250 252;
+  --color-text: 15 23 42;
+  --color-muted: 100 116 139;
+  --color-border: 226 232 240;
+
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-pill: 9999px;
+
+  --shadow-soft: 0 1px 2px rgba(0, 0, 0, 0.04), 0 4px 16px rgba(0, 0, 0, 0.04);
+  --shadow-pronounced: 0 8px 30px rgba(0, 0, 0, 0.12);
+
+  /* Next.js/SSR adaptation: seed the runtime-only active tokens so server-
+     rendered markup is styled before ThemeProvider hydrates (maps to the
+     default md/soft theme). ThemeProvider overrides these per tenant at runtime. */
+  --radius-active: 12px;
+  --shadow-active: 0 1px 2px rgba(0, 0, 0, 0.04), 0 4px 16px rgba(0, 0, 0, 0.06);
+
+  --font-body: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-heading: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+
+  font-family: var(--font-body);
+  line-height: 1.5;
+  color-scheme: light;
+}
+
+html,
+body {
+  margin: 0;
+  min-height: 100vh;
+  background-color: rgb(var(--color-bg));
+  color: rgb(var(--color-text));
+}
+
+* {
+  box-sizing: border-box;
+}
+
+[dir="rtl"] {
+  font-family: var(--font-body);
+}
+
+/* Theme presets only set CSS variables — components remain generic. */
+.theme-luxury {
+  --color-primary: 18 18 18;
+  --color-primary-fg: 248 226 165;
+  --color-secondary: 212 175 55;
+  --color-accent: 250 204 21;
+  --color-bg: 12 12 12;
+  --color-surface: 24 24 24;
+  --color-text: 245 245 245;
+  --color-muted: 161 161 170;
+  --color-border: 39 39 42;
+  --shadow-soft: 0 1px 2px rgba(0, 0, 0, 0.5), 0 4px 16px rgba(0, 0, 0, 0.4);
+  --shadow-pronounced: 0 12px 40px rgba(0, 0, 0, 0.6);
+  color-scheme: dark;
+}
+
+.theme-modern-minimal {
+  --color-primary: 17 17 17;
+  --color-primary-fg: 255 255 255;
+  --color-secondary: 99 102 241;
+  --color-accent: 79 70 229;
+  --color-bg: 255 255 255;
+  --color-surface: 249 250 251;
+  --color-text: 17 17 17;
+  --color-muted: 107 114 128;
+  --color-border: 229 231 235;
+}
+
+.theme-fast-food {
+  --color-primary: 220 38 38;
+  --color-primary-fg: 255 255 255;
+  --color-secondary: 250 204 21;
+  --color-accent: 234 88 12;
+  --color-bg: 255 251 235;
+  --color-surface: 255 255 255;
+  --color-text: 23 23 23;
+  --color-muted: 120 113 108;
+  --color-border: 254 215 170;
+}
+
+.theme-traditional-arabic {
+  --color-primary: 120 53 15;
+  --color-primary-fg: 254 243 199;
+  --color-secondary: 180 83 9;
+  --color-accent: 217 119 6;
+  --color-bg: 255 251 235;
+  --color-surface: 254 243 199;
+  --color-text: 41 37 36;
+  --color-muted: 120 113 108;
+  --color-border: 231 187 122;
+}
+
+/* Hide scrollbar for horizontal category strips */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.no-scrollbar {
+  scrollbar-width: none;
+}
