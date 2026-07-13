@@ -1,3 +1,4 @@
+
 # MenuNova — Style Extraction (exact clone spec)
 
 This is the **complete, verbatim design system** of the MenuNova frontend. An agent
