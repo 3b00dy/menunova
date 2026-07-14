@@ -1,5 +1,5 @@
 import type { Locale } from "@/shared/i18n/config";
-import { getServerSession } from "@/shared/auth/getServerSession";
+import { getSession, hasRole } from "@/features/auth";
 import { getRestaurantSettings } from "@/features/restaurant";
 import {
   DashboardSidebar,
@@ -25,16 +25,20 @@ export default async function DashboardLayout({
 }) {
   // Narrow for parity with other routes; direction/labels come via i18n context.
   void ((await params) as { locale: Locale });
-  // Coarse guard; real redirect happens in proxy. Kept for defense-in-depth.
-  await getServerSession();
+  // Resolve the session: role drives the nav (super-admin sees All Restaurants).
+  const session = await getSession();
+  const isSuperAdmin = !!session && hasRole(session.user, "super_admin");
   // Restaurant's supported languages drive the sidebar language switcher.
   const settings = await getRestaurantSettings(RESTAURANT_SLUG);
 
   return (
     <div className="flex flex-1">
-      <DashboardSidebar supportedLanguages={settings.supportedLanguages} />
+      <DashboardSidebar
+        supportedLanguages={settings.supportedLanguages}
+        isSuperAdmin={isSuperAdmin}
+      />
       <div className="flex flex-1 flex-col min-w-0">
-        <DashboardMobileNav />
+        <DashboardMobileNav isSuperAdmin={isSuperAdmin} />
         <main className="flex-1 p-8">{children}</main>
       </div>
     </div>

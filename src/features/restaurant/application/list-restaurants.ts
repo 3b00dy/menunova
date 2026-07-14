@@ -3,16 +3,16 @@ import type { RestaurantRepository } from "@/features/restaurant/domain/restaura
 import { restaurantRepository } from "@/features/restaurant/infrastructure/restaurant.repository";
 
 /**
- * Resolve a tenant by its slug. Repository is injected (default = selector).
- * Resilient: returns null on failure so callers can render an empty state.
+ * List all restaurants (super-admin view). Repository is injected (default =
+ * selector) so it's testable. Swallows backend errors and returns an empty list
+ * so the page renders an empty state when the API is down.
  */
-export async function getRestaurantBySlug(
-  slug: string,
+export async function listRestaurants(
   repo: RestaurantRepository = restaurantRepository,
-): Promise<Restaurant | null> {
+): Promise<Restaurant[]> {
   try {
-    return await repo.getBySlug(slug);
+    return await repo.list();
   } catch {
-    return null;
+    return [];
   }
 }
