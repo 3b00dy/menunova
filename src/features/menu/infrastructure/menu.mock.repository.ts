@@ -35,16 +35,16 @@ function seedDemo(): MenuStore {
   return {
     slug: "demo",
     categories: [
-      { id: "c_starters", name: "Starters", position: 0 },
-      { id: "c_mains", name: "Mains", position: 1 },
-      { id: "c_drinks", name: "Drinks", position: 2 },
+      { id: "c_starters", name: { en: "Starters", ar: "المقبّلات" }, position: 0 },
+      { id: "c_mains", name: { en: "Mains", ar: "الأطباق الرئيسية" }, position: 1 },
+      { id: "c_drinks", name: { en: "Drinks", ar: "المشروبات" }, position: 2 },
     ],
     items: [
-      { id: "i_bruschetta", categoryId: "c_starters", name: "Bruschetta", description: "Toasted bread, tomato, basil.", price: money(18), available: true },
-      { id: "i_soup", categoryId: "c_starters", name: "Lentil Soup", description: "Warm spiced red lentils.", price: money(15), available: true },
-      { id: "i_margherita", categoryId: "c_mains", name: "Margherita Pizza", description: "San Marzano, mozzarella, basil.", price: money(42), available: true },
-      { id: "i_burger", categoryId: "c_mains", name: "Smash Burger", description: "Double patty, cheddar, pickles.", price: money(48), available: false },
-      { id: "i_lemonade", categoryId: "c_drinks", name: "Mint Lemonade", description: "Fresh lemon, mint, soda.", price: money(12), available: true },
+      { id: "i_bruschetta", categoryId: "c_starters", name: { en: "Bruschetta", ar: "بروسكيتا" }, description: { en: "Toasted bread, tomato, basil.", ar: "خبز محمّص وطماطم وريحان." }, price: money(18), available: true },
+      { id: "i_soup", categoryId: "c_starters", name: { en: "Lentil Soup", ar: "شوربة عدس" }, description: { en: "Warm spiced red lentils.", ar: "عدس أحمر متبّل ودافئ." }, price: money(15), available: true },
+      { id: "i_margherita", categoryId: "c_mains", name: { en: "Margherita Pizza", ar: "بيتزا مارغريتا" }, description: { en: "San Marzano, mozzarella, basil.", ar: "صلصة سان مارزانو وموزاريلا وريحان." }, price: money(42), available: true },
+      { id: "i_burger", categoryId: "c_mains", name: { en: "Smash Burger", ar: "سماش برغر" }, description: { en: "Double patty, cheddar, pickles.", ar: "قطعتا لحم وجبنة شيدر ومخلّل." }, price: money(48), available: false },
+      { id: "i_lemonade", categoryId: "c_drinks", name: { en: "Mint Lemonade", ar: "ليموناضة بالنعناع" }, description: { en: "Fresh lemon, mint, soda.", ar: "ليمون طازج ونعناع وصودا." }, price: money(12), available: true },
     ],
   };
 }

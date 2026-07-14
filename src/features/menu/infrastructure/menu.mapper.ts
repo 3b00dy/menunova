@@ -5,14 +5,17 @@ import type { Category, Menu, MenuItem } from "@/features/menu/domain/menu.entit
  * change in the API's JSON shape only touches this file, not the domain or UI.
  */
 
+/** Localized text over the wire: locale code → string (e.g. { en, ar }). */
+type LocalizedDto = Record<string, string>;
+
 export interface MenuDto {
   restaurant_slug: string;
-  categories: Array<{ id: string; name: string; position: number }>;
+  categories: Array<{ id: string; name: LocalizedDto; position: number }>;
   items: Array<{
     id: string;
     category_id: string;
-    name: string;
-    description: string;
+    name: LocalizedDto;
+    description: LocalizedDto;
     price_minor: number;
     currency: string;
     available: boolean;

@@ -10,7 +10,7 @@ import {
 } from "lucide-react";
 import { useI18n } from "@/shared/i18n/I18nProvider";
 import { routes } from "@/shared/config/routes";
-import { Sidebar, MobileNav, BrandLogo, type NavItem } from "@/shared/ui";
+import { Sidebar, MobileNav, BrandLogo, LanguagePicker, type NavItem } from "@/shared/ui";
 
 /**
  * Client nav for the dashboard. Icons (lucide components) can't be passed from
@@ -29,8 +29,19 @@ function useNavItems(): NavItem[] {
   ];
 }
 
-export function DashboardSidebar() {
-  return <Sidebar brand={<BrandLogo />} items={useNavItems()} />;
+/**
+ * Language switcher at the bottom of the sidebar, restricted to the languages
+ * the restaurant supports (from its settings). `LanguagePicker` renders nothing
+ * when only one language is supported.
+ */
+export function DashboardSidebar({ supportedLanguages }: { supportedLanguages: string[] }) {
+  return (
+    <Sidebar
+      brand={<BrandLogo />}
+      items={useNavItems()}
+      footer={<LanguagePicker supportedCodes={supportedLanguages} className="w-full justify-between" />}
+    />
+  );
 }
 
 export function DashboardMobileNav() {

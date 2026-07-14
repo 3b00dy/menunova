@@ -4,6 +4,8 @@ import { useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Plus, Pencil, Trash2, UtensilsCrossed, Search, X, SearchX } from "lucide-react";
 import { useI18n } from "@/shared/i18n/I18nProvider";
+import { SUPPORTED_LANGUAGES } from "@/shared/i18n/languages";
+import { localize, toLocalizedText, type LocalizedText } from "@/shared/i18n/localized";
 import { formatMoney } from "@/shared/utils/formatMoney";
 import {
   Badge,
@@ -40,12 +42,26 @@ type Dialog =
   | { type: "delete"; kind: "item" | "category"; id: string; name: string }
   | null;
 
+const langName = (code: string) => SUPPORTED_LANGUAGES[code]?.name ?? code.toUpperCase();
+const langDir = (code: string) => SUPPORTED_LANGUAGES[code]?.dir ?? "ltr";
+
 /**
- * Dashboard menu manager: full CRUD over categories and items. Client Component
- * that calls the menu feature's Server Actions and refreshes the server-rendered
- * data after each mutation. i18n comes from the shared dictionary context.
+ * Dashboard menu manager: full CRUD over categories and items. Content
+ * (names/descriptions) is authored in every language the restaurant supports
+ * (`languages`); the list renders in the active UI locale, falling back to the
+ * restaurant's default language when a translation is missing.
  */
-export function MenuManager({ menu, slug }: { menu: Menu | null; slug: string }) {
+export function MenuManager({
+  menu,
+  slug,
+  languages,
+  defaultLanguage,
+}: {
+  menu: Menu | null;
+  slug: string;
+  languages: string[];
+  defaultLanguage: string;
+}) {
   const { locale, dictionary: t } = useI18n();
   const m = t.menu.manage;
   const router = useRouter();
@@ -53,6 +69,8 @@ export function MenuManager({ menu, slug }: { menu: Menu | null; slug: string })
   const [dialog, setDialog] = useState<Dialog>(null);
   const [query, setQuery] = useState("");
   const [activeCategory, setActiveCategory] = useState<string>("all");
+
+  const tr = (text: LocalizedText) => localize(text, locale, defaultLanguage);
 
   const categories = useMemo(
     () => [...(menu?.categories ?? [])].sort((a, b) => a.position - b.position),
@@ -69,11 +87,17 @@ export function MenuManager({ menu, slug }: { menu: Menu | null; slug: string })
     });
   }
 
-  // Filter by the active category chip and the search query. During a search,
-  // categories with no matches are hidden to focus results; with no search, all
-  // (visible) categories stay shown so empty ones can still be managed.
+  // Filter by the active category chip and the search query. Search matches text
+  // in ANY language so an Arabic or English keyword both find the item. During a
+  // search, categories with no matches are hidden to focus results.
   const q = query.trim().toLowerCase();
   const groups = useMemo(() => {
+    const matches = (i: MenuItem) =>
+      q === "" ||
+      [...Object.values(i.name), ...Object.values(i.description)]
+        .join(" ")
+        .toLowerCase()
+        .includes(q);
     const scoped =
       activeCategory === "all"
         ? categories
@@ -81,13 +105,7 @@ export function MenuManager({ menu, slug }: { menu: Menu | null; slug: string })
     return scoped
       .map((category) => ({
         category,
-        items: items.filter(
-          (i) =>
-            i.categoryId === category.id &&
-            (q === "" ||
-              i.name.toLowerCase().includes(q) ||
-              i.description.toLowerCase().includes(q)),
-        ),
+        items: items.filter((i) => i.categoryId === category.id && matches(i)),
       }))
       .filter((g) => q === "" || g.items.length > 0);
   }, [categories, items, activeCategory, q]);
@@ -152,7 +170,7 @@ export function MenuManager({ menu, slug }: { menu: Menu | null; slug: string })
               {categories.map((category) => (
                 <FilterChip
                   key={category.id}
-                  label={category.name}
+                  label={tr(category.name)}
                   count={items.filter((i) => i.categoryId === category.id).length}
                   active={activeCategory === category.id}
                   onClick={() => setActiveCategory(category.id)}
@@ -193,7 +211,7 @@ export function MenuManager({ menu, slug }: { menu: Menu | null; slug: string })
                   <CardHeader className="flex flex-wrap items-center justify-between gap-3">
                     <div className="flex items-center gap-2">
                       <h2 className="text-lg font-semibold text-[rgb(var(--color-text))]">
-                        {category.name}
+                        {tr(category.name)}
                       </h2>
                       <Badge tone="neutral">
                         {catItems.length} {m.itemsCount}
@@ -217,7 +235,7 @@ export function MenuManager({ menu, slug }: { menu: Menu | null; slug: string })
                             type: "delete",
                             kind: "category",
                             id: category.id,
-                            name: category.name,
+                            name: tr(category.name),
                           })
                         }
                       >
@@ -248,15 +266,15 @@ export function MenuManager({ menu, slug }: { menu: Menu | null; slug: string })
                           <div className="min-w-0 flex-1">
                             <div className="flex items-center gap-2">
                               <span className="truncate font-medium text-[rgb(var(--color-text))]">
-                                {item.name}
+                                {tr(item.name)}
                               </span>
                               {!item.available && (
                                 <Badge tone="danger">{m.unavailable}</Badge>
                               )}
                             </div>
-                            {item.description && (
+                            {tr(item.description) && (
                               <p className="truncate text-sm text-[rgb(var(--color-muted))]">
-                                {item.description}
+                                {tr(item.description)}
                               </p>
                             )}
                           </div>
@@ -294,7 +312,7 @@ export function MenuManager({ menu, slug }: { menu: Menu | null; slug: string })
                                   type: "delete",
                                   kind: "item",
                                   id: item.id,
-                                  name: item.name,
+                                  name: tr(item.name),
                                 })
                               }
                             >
@@ -316,6 +334,7 @@ export function MenuManager({ menu, slug }: { menu: Menu | null; slug: string })
         <CategoryForm
           labels={m}
           editing={dialog.editing}
+          languages={languages}
           pending={pending}
           onClose={() => setDialog(null)}
           onSubmit={(name) =>
@@ -333,6 +352,8 @@ export function MenuManager({ menu, slug }: { menu: Menu | null; slug: string })
           labels={m}
           editing={dialog.editing}
           categories={categories}
+          languages={languages}
+          defaultLanguage={defaultLanguage}
           defaultCategoryId={dialog.categoryId}
           defaultCurrency={defaultCurrency}
           pending={pending}
@@ -442,21 +463,34 @@ function ItemThumb({ item }: { item: MenuItem }) {
 
 type Labels = ReturnType<typeof useI18n>["dictionary"]["menu"]["manage"];
 
+/** Small heading marking a per-language block in the forms. */
+function LangBadge({ code }: { code: string }) {
+  return (
+    <span className="text-xs font-semibold uppercase tracking-wide text-[rgb(var(--color-muted))]">
+      {langName(code)}
+    </span>
+  );
+}
+
 function CategoryForm({
   labels: m,
   editing,
+  languages,
   pending,
   onClose,
   onSubmit,
 }: {
   labels: Labels;
   editing: Category | null;
+  languages: string[];
   pending: boolean;
   onClose: () => void;
-  onSubmit: (name: string) => void;
+  onSubmit: (name: LocalizedText) => void;
 }) {
-  const [name, setName] = useState(editing?.name ?? "");
-  const valid = name.trim().length > 0;
+  const [names, setNames] = useState<Record<string, string>>(() =>
+    Object.fromEntries(languages.map((l) => [l, editing?.name[l] ?? ""])),
+  );
+  const valid = languages.every((l) => names[l]?.trim());
 
   return (
     <Modal
@@ -468,23 +502,25 @@ function CategoryForm({
           <Button variant="ghost" onClick={onClose} disabled={pending}>
             {m.cancel}
           </Button>
-          <Button
-            disabled={!valid || pending}
-            onClick={() => onSubmit(name.trim())}
-          >
+          <Button disabled={!valid || pending} onClick={() => onSubmit(toLocalizedText(names))}>
             {editing ? m.save : m.create}
           </Button>
         </>
       }
     >
-      <Field label={m.categoryName}>
-        <Input
-          autoFocus
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          placeholder={m.categoryNamePlaceholder}
-        />
-      </Field>
+      <div className="flex flex-col gap-4">
+        {languages.map((lang, idx) => (
+          <Field key={lang} label={`${m.categoryName} · ${langName(lang)}`}>
+            <Input
+              autoFocus={idx === 0}
+              dir={langDir(lang)}
+              value={names[lang] ?? ""}
+              onChange={(e) => setNames((s) => ({ ...s, [lang]: e.target.value }))}
+              placeholder={m.categoryNamePlaceholder}
+            />
+          </Field>
+        ))}
+      </div>
     </Modal>
   );
 }
@@ -493,6 +529,8 @@ function ItemForm({
   labels: m,
   editing,
   categories,
+  languages,
+  defaultLanguage,
   defaultCategoryId,
   defaultCurrency,
   pending,
@@ -502,21 +540,27 @@ function ItemForm({
   labels: Labels;
   editing: MenuItem | null;
   categories: Category[];
+  languages: string[];
+  defaultLanguage: string;
   defaultCategoryId: string;
   defaultCurrency: string;
   pending: boolean;
   onClose: () => void;
   onSubmit: (draft: {
     categoryId: string;
-    name: string;
-    description: string;
+    name: LocalizedText;
+    description: LocalizedText;
     price: { amountMinor: number; currency: string };
     available: boolean;
     imageUrl?: string;
   }) => void;
 }) {
-  const [name, setName] = useState(editing?.name ?? "");
-  const [description, setDescription] = useState(editing?.description ?? "");
+  const [names, setNames] = useState<Record<string, string>>(() =>
+    Object.fromEntries(languages.map((l) => [l, editing?.name[l] ?? ""])),
+  );
+  const [descriptions, setDescriptions] = useState<Record<string, string>>(() =>
+    Object.fromEntries(languages.map((l) => [l, editing?.description[l] ?? ""])),
+  );
   const [priceMajor, setPriceMajor] = useState(
     editing ? (editing.price.amountMinor / 100).toString() : "",
   );
@@ -526,14 +570,16 @@ function ItemForm({
 
   const priceValue = Number(priceMajor);
   const validPrice = priceMajor.trim() !== "" && Number.isFinite(priceValue) && priceValue >= 0;
-  const valid = name.trim().length > 0 && validPrice && categoryId;
+  const validNames = languages.every((l) => names[l]?.trim());
+  const valid = validNames && validPrice && Boolean(categoryId);
   const currency = editing?.price.currency ?? defaultCurrency;
+  const tr = (text: LocalizedText) => localize(text, defaultLanguage, defaultLanguage);
 
   function submit() {
     onSubmit({
       categoryId,
-      name: name.trim(),
-      description: description.trim(),
+      name: toLocalizedText(names),
+      description: toLocalizedText(descriptions),
       price: { amountMinor: Math.round(priceValue * 100), currency },
       available,
       imageUrl: imageUrl.trim() || undefined,
@@ -545,6 +591,7 @@ function ItemForm({
       open
       onClose={onClose}
       title={editing ? m.editItem : m.newItem}
+      size="lg"
       footer={
         <>
           <Button variant="ghost" onClick={onClose} disabled={pending}>
@@ -557,17 +604,32 @@ function ItemForm({
       }
     >
       <div className="flex flex-col gap-4">
-        <Field label={m.itemName}>
-          <Input
-            autoFocus
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            placeholder={m.itemNamePlaceholder}
-          />
-        </Field>
-        <Field label={m.description}>
-          <Textarea value={description} onChange={(e) => setDescription(e.target.value)} />
-        </Field>
+        {/* Per-language content blocks */}
+        {languages.map((lang, idx) => (
+          <div
+            key={lang}
+            className="flex flex-col gap-3 rounded-[var(--radius-active)] border border-[rgb(var(--color-border))] p-3"
+          >
+            <LangBadge code={lang} />
+            <Field label={m.itemName}>
+              <Input
+                autoFocus={idx === 0}
+                dir={langDir(lang)}
+                value={names[lang] ?? ""}
+                onChange={(e) => setNames((s) => ({ ...s, [lang]: e.target.value }))}
+                placeholder={m.itemNamePlaceholder}
+              />
+            </Field>
+            <Field label={m.description}>
+              <Textarea
+                dir={langDir(lang)}
+                value={descriptions[lang] ?? ""}
+                onChange={(e) => setDescriptions((s) => ({ ...s, [lang]: e.target.value }))}
+              />
+            </Field>
+          </div>
+        ))}
+
         <div className="grid grid-cols-2 gap-4">
           <Field label={`${m.price} (${currency})`}>
             <Input
@@ -588,7 +650,7 @@ function ItemForm({
             >
               {categories.map((c) => (
                 <option key={c.id} value={c.id}>
-                  {c.name}
+                  {tr(c.name)}
                 </option>
               ))}
             </select>

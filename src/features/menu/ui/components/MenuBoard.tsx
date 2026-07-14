@@ -1,6 +1,7 @@
 import type { Menu } from "@/features/menu/domain/menu.entity";
 import { itemsInCategory, visibleCategories } from "@/features/menu/domain/menu.rules";
 import type { Locale } from "@/shared/i18n/config";
+import { localize } from "@/shared/i18n/localized";
 import { MenuItemCard } from "@/features/menu/ui/components/MenuItemCard";
 
 /**
@@ -26,7 +27,7 @@ export function MenuBoard({
     <div className="flex flex-col gap-10">
       {visibleCategories(menu).map((category) => (
         <section key={category.id} className="flex flex-col gap-4">
-          <h2 className="text-xl font-semibold">{category.name}</h2>
+          <h2 className="text-xl font-semibold">{localize(category.name, locale)}</h2>
           <div className="grid gap-3">
             {itemsInCategory(menu, category.id).map((item) => (
               <MenuItemCard key={item.id} item={item} locale={locale} />

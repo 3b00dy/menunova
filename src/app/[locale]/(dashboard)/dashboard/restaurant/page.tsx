@@ -1,7 +1,11 @@
 import type { Locale } from "@/shared/i18n/config";
 import { getDictionary } from "@/shared/i18n/getDictionary";
+import { PageHeader } from "@/shared/ui";
+import { getRestaurantSettings, LanguageSettingsForm } from "@/features/restaurant";
 
-/** SKELETON: restaurant settings (wire `@/features/restaurant`). */
+const RESTAURANT_SLUG = "demo"; // TODO: derive from the authenticated user's restaurant
+
+/** Restaurant settings — currently the menu language configuration. */
 export default async function RestaurantSettingsPage({
   params,
 }: {
@@ -9,5 +13,15 @@ export default async function RestaurantSettingsPage({
 }) {
   const { locale } = (await params) as { locale: Locale };
   const t = await getDictionary(locale);
-  return <h1 className="text-2xl font-semibold">{t.dashboard.restaurant}</h1>;
+  const settings = await getRestaurantSettings(RESTAURANT_SLUG);
+
+  return (
+    <section className="flex flex-col gap-2">
+      <PageHeader
+        title={t.dashboard.languageSettings.title}
+        description={t.dashboard.languageSettings.subtitle}
+      />
+      <LanguageSettingsForm settings={settings} slug={RESTAURANT_SLUG} />
+    </section>
+  );
 }

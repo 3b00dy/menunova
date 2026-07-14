@@ -1,9 +1,12 @@
 import type { Locale } from "@/shared/i18n/config";
 import { getServerSession } from "@/shared/auth/getServerSession";
+import { getRestaurantSettings } from "@/features/restaurant";
 import {
   DashboardSidebar,
   DashboardMobileNav,
 } from "@/app/[locale]/(dashboard)/_components/DashboardNav";
+
+const RESTAURANT_SLUG = "demo"; // TODO: derive from the authenticated user's restaurant
 
 /**
  * Authenticated owner/staff shell (sidebar + content).
@@ -24,10 +27,12 @@ export default async function DashboardLayout({
   void ((await params) as { locale: Locale });
   // Coarse guard; real redirect happens in proxy. Kept for defense-in-depth.
   await getServerSession();
+  // Restaurant's supported languages drive the sidebar language switcher.
+  const settings = await getRestaurantSettings(RESTAURANT_SLUG);
 
   return (
     <div className="flex flex-1">
-      <DashboardSidebar />
+      <DashboardSidebar supportedLanguages={settings.supportedLanguages} />
       <div className="flex flex-1 flex-col min-w-0">
         <DashboardMobileNav />
         <main className="flex-1 p-8">{children}</main>

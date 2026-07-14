@@ -13,8 +13,10 @@ export function useMenuFilters(menu: Menu | null) {
 
   const items: MenuItem[] = useMemo(() => {
     if (!menu) return [];
+    const q = query.toLowerCase();
     return menu.items.filter((item) => {
-      const matchesQuery = item.name.toLowerCase().includes(query.toLowerCase());
+      // Match against the name in any language the item is authored in.
+      const matchesQuery = Object.values(item.name).join(" ").toLowerCase().includes(q);
       const matchesCategory = categoryId ? item.categoryId === categoryId : true;
       return matchesQuery && matchesCategory;
     });

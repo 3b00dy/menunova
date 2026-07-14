@@ -16,7 +16,16 @@
     "restaurant": "Restaurant",
     "staff": "Staff",
     "billing": "Billing",
-    "themeBuilder": "Theme Builder"
+    "themeBuilder": "Theme Builder",
+    "languageSettings": {
+      "title": "Languages",
+      "subtitle": "Choose the languages your menu is offered in. Menu content is entered in each supported language.",
+      "supported": "Supported languages",
+      "default": "Default language",
+      "defaultHint": "Used as a fallback when a customer's language has no translation.",
+      "save": "Save changes",
+      "saved": "Saved"
+    }
   },
   "menu": {
     "empty": "No menu items yet.",
