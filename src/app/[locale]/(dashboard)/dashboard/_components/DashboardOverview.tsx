@@ -12,6 +12,7 @@ import {
   ArrowRight,
   Coins,
   Tag,
+  Users,
 } from "lucide-react";
 import type { Locale } from "@/shared/i18n/config";
 import type { Dictionary } from "@/shared/i18n/getDictionary";
@@ -22,6 +23,7 @@ import { routes } from "@/shared/config/routes";
 import { Badge, Card, CardBody, CardHeader, PageHeader } from "@/shared/ui";
 import type { MenuStats } from "@/features/menu";
 import { statusTone, type Restaurant } from "@/features/restaurant";
+import type { DashboardCapabilities } from "@/app/[locale]/(dashboard)/_lib/access";
 
 type Icon = ComponentType<{ className?: string }>;
 
@@ -40,7 +42,7 @@ export function DashboardOverview({
   stats,
   dict,
   locale,
-  isSuperAdmin,
+  caps,
 }: {
   restaurant: Restaurant;
   supportedLanguages: string[];
@@ -48,7 +50,7 @@ export function DashboardOverview({
   stats: MenuStats;
   dict: Dictionary["dashboard"];
   locale: Locale;
-  isSuperAdmin: boolean;
+  caps: DashboardCapabilities;
 }) {
   const o = dict.overview;
   const money = (minor: number) =>
@@ -125,12 +127,21 @@ export function DashboardOverview({
             </dl>
           </CardBody>
         </Card>
-        {/* Quick actions */}
+        {/* Quick actions — gated to the current role's capabilities */}
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-1 col-span-2">
-          <QuickAction href={routes.dashboardMenu(locale)} icon={UtensilsCrossed} label={o.actions.manageMenu} />
-          <QuickAction href={routes.dashboardTheme(locale)} icon={Palette} label={o.actions.customizeTheme} />
-          <QuickAction href={routes.dashboardRestaurant(locale)} icon={Languages} label={o.actions.languages} />
-          {isSuperAdmin ? (
+          {caps.menu && (
+            <QuickAction href={routes.dashboardMenu(locale)} icon={UtensilsCrossed} label={o.actions.manageMenu} />
+          )}
+          {caps.theme && (
+            <QuickAction href={routes.dashboardTheme(locale)} icon={Palette} label={o.actions.customizeTheme} />
+          )}
+          {caps.settings && (
+            <QuickAction href={routes.dashboardRestaurant(locale)} icon={Languages} label={o.actions.languages} />
+          )}
+          {caps.staff && (
+            <QuickAction href={routes.dashboardStaff(locale)} icon={Users} label={o.actions.manageStaff} />
+          )}
+          {caps.restaurants ? (
             <QuickAction href={routes.dashboardRestaurants(locale)} icon={Building2} label={dict.allRestaurants} />
           ) : (
             <QuickAction href={routes.publicMenu(locale, restaurant.slug)} icon={ExternalLink} label={o.account.viewPublicMenu} external />

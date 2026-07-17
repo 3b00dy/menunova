@@ -29,6 +29,7 @@ import {
   createMenuItem,
   deleteMenuItem,
   updateMenuItem,
+  setItemAvailability,
 } from "@/features/menu/application/item-actions";
 import {
   createCategory,
@@ -46,21 +47,28 @@ const langName = (code: string) => SUPPORTED_LANGUAGES[code]?.name ?? code.toUpp
 const langDir = (code: string) => SUPPORTED_LANGUAGES[code]?.dir ?? "ltr";
 
 /**
- * Dashboard menu manager: full CRUD over categories and items. Content
- * (names/descriptions) is authored in every language the restaurant supports
- * (`languages`); the list renders in the active UI locale, falling back to the
- * restaurant's default language when a translation is missing.
+ * Dashboard menu manager. Content (names/descriptions) is authored in every
+ * language the restaurant supports (`languages`); the list renders in the active
+ * UI locale, falling back to the restaurant's default language when a
+ * translation is missing.
+ *
+ * `canManage` reflects the `menu:manage` capability. When false (a restaurant
+ * **staff** member), the editing affordances — add/edit/delete of categories
+ * and items — are hidden; only the per-item availability toggle remains, which
+ * is the one thing staff may change.
  */
 export function MenuManager({
   menu,
   slug,
   languages,
   defaultLanguage,
+  canManage,
 }: {
   menu: Menu | null;
   slug: string;
   languages: string[];
   defaultLanguage: string;
+  canManage: boolean;
 }) {
   const { locale, dictionary: t } = useI18n();
   const m = t.menu.manage;
@@ -117,22 +125,26 @@ export function MenuManager({
     <section className="flex flex-col gap-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-2xl font-semibold">{t.dashboard.menu}</h1>
-        <Button onClick={() => setDialog({ type: "category", editing: null })}>
-          <Plus className="h-4 w-4" />
-          {m.addCategory}
-        </Button>
+        {canManage && (
+          <Button onClick={() => setDialog({ type: "category", editing: null })}>
+            <Plus className="h-4 w-4" />
+            {m.addCategory}
+          </Button>
+        )}
       </div>
 
       {categories.length === 0 ? (
         <EmptyState
           icon={<UtensilsCrossed className="h-6 w-6" />}
           title={m.noCategories}
-          description={m.noCategoriesHint}
+          description={canManage ? m.noCategoriesHint : undefined}
           action={
-            <Button onClick={() => setDialog({ type: "category", editing: null })}>
-              <Plus className="h-4 w-4" />
-              {m.addCategory}
-            </Button>
+            canManage ? (
+              <Button onClick={() => setDialog({ type: "category", editing: null })}>
+                <Plus className="h-4 w-4" />
+                {m.addCategory}
+              </Button>
+            ) : undefined
           }
         />
       ) : (
@@ -217,41 +229,43 @@ export function MenuManager({
                         {catItems.length} {m.itemsCount}
                       </Badge>
                     </div>
-                    <div className="flex items-center gap-1">
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        aria-label={m.editCategory}
-                        onClick={() => setDialog({ type: "category", editing: category })}
-                      >
-                        <Pencil className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        aria-label={m.deleteCategory}
-                        onClick={() =>
-                          setDialog({
-                            type: "delete",
-                            kind: "category",
-                            id: category.id,
-                            name: tr(category.name),
-                          })
-                        }
-                      >
-                        <Trash2 className="h-4 w-4 text-red-600" />
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="secondary"
-                        onClick={() =>
-                          setDialog({ type: "item", editing: null, categoryId: category.id })
-                        }
-                      >
-                        <Plus className="h-4 w-4" />
-                        {m.addItem}
-                      </Button>
-                    </div>
+                    {canManage && (
+                      <div className="flex items-center gap-1">
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          aria-label={m.editCategory}
+                          onClick={() => setDialog({ type: "category", editing: category })}
+                        >
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          aria-label={m.deleteCategory}
+                          onClick={() =>
+                            setDialog({
+                              type: "delete",
+                              kind: "category",
+                              id: category.id,
+                              name: tr(category.name),
+                            })
+                          }
+                        >
+                          <Trash2 className="h-4 w-4 text-red-600" />
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="secondary"
+                          onClick={() =>
+                            setDialog({ type: "item", editing: null, categoryId: category.id })
+                          }
+                        >
+                          <Plus className="h-4 w-4" />
+                          {m.addItem}
+                        </Button>
+                      </div>
+                    )}
                   </CardHeader>
                   <CardBody className="flex flex-col gap-2">
                     {catItems.length === 0 ? (
@@ -285,40 +299,42 @@ export function MenuManager({
                             checked={item.available}
                             disabled={pending}
                             onChange={(next) =>
-                              run(() => updateMenuItem(slug, item.id, { available: next }))
+                              run(() => setItemAvailability(slug, item.id, next))
                             }
                           />
-                          <div className="flex items-center gap-1">
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              aria-label={m.editItem}
-                              onClick={() =>
-                                setDialog({
-                                  type: "item",
-                                  editing: item,
-                                  categoryId: item.categoryId,
-                                })
-                              }
-                            >
-                              <Pencil className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              aria-label={m.deleteItem}
-                              onClick={() =>
-                                setDialog({
-                                  type: "delete",
-                                  kind: "item",
-                                  id: item.id,
-                                  name: tr(item.name),
-                                })
-                              }
-                            >
-                              <Trash2 className="h-4 w-4 text-red-600" />
-                            </Button>
-                          </div>
+                          {canManage && (
+                            <div className="flex items-center gap-1">
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                aria-label={m.editItem}
+                                onClick={() =>
+                                  setDialog({
+                                    type: "item",
+                                    editing: item,
+                                    categoryId: item.categoryId,
+                                  })
+                                }
+                              >
+                                <Pencil className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                aria-label={m.deleteItem}
+                                onClick={() =>
+                                  setDialog({
+                                    type: "delete",
+                                    kind: "item",
+                                    id: item.id,
+                                    name: tr(item.name),
+                                  })
+                                }
+                              >
+                                <Trash2 className="h-4 w-4 text-red-600" />
+                              </Button>
+                            </div>
+                          )}
                         </div>
                       ))
                     )}

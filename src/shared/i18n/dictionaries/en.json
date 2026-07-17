@@ -45,7 +45,8 @@
       "actions": {
         "manageMenu": "Manage menu",
         "customizeTheme": "Customize theme",
-        "languages": "Languages"
+        "languages": "Languages",
+        "manageStaff": "Manage staff"
       }
     },
     "menu": "Menu",
@@ -91,6 +92,41 @@
       "defaultHint": "Used as a fallback when a customer's language has no translation.",
       "save": "Save changes",
       "saved": "Saved"
+    },
+    "menuAdmin": {
+      "restaurant": "Restaurant",
+      "noRestaurants": "No restaurants yet",
+      "noRestaurantsHint": "Create a restaurant first, then manage its menu here."
+    },
+    "roles": {
+      "super_admin": "Super Admin",
+      "owner": "Restaurant Admin",
+      "staff": "Restaurant Staff"
+    },
+    "roleSwitcher": {
+      "label": "Preview as role (demo)"
+    },
+    "staffManager": {
+      "title": "Staff",
+      "subtitle": "Invite your team and set what each member can do.",
+      "add": "Invite staff",
+      "newMember": "Invite staff member",
+      "memberName": "Full name",
+      "namePlaceholder": "e.g. Sara Karim",
+      "email": "Email",
+      "emailPlaceholder": "name@restaurant.com",
+      "role": "Role",
+      "roles": { "owner": "Restaurant Admin", "staff": "Staff" },
+      "statuses": { "active": "Active", "invited": "Invited" },
+      "roleHint": "Staff can only mark items in or out of stock. Admins manage the whole restaurant.",
+      "create": "Send invite",
+      "cancel": "Cancel",
+      "remove": "Remove",
+      "removeTitle": "Remove staff member",
+      "removeConfirm": "Remove \"{name}\" from the team?",
+      "removeNote": "They will lose access to this restaurant's dashboard. This cannot be undone.",
+      "empty": "No staff yet.",
+      "emptyHint": "Invite your first team member to help manage the menu."
     }
   },
   "menu": {

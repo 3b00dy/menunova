@@ -32,13 +32,30 @@ export const API_ENDPOINTS = {
     /** GET · PUT — a restaurant's language settings */
     languageSettings: (slug: string) =>
       `/restaurants/${encodeURIComponent(slug)}/settings/languages`,
+    /**
+     * GET (list) · POST (invite) — a restaurant's staff members.
+     * NOT YET IMPLEMENTED by the backend — see docs/backend-endpoints-missing.md.
+     */
+    staff: (slug: string) => `/restaurants/${encodeURIComponent(slug)}/staff`,
   },
   menuItems: {
     /** PATCH · DELETE — by id */
     byId: (id: string) => `/menu-items/${encodeURIComponent(id)}`,
+    /**
+     * PATCH — set only availability. Optional narrower endpoint for the staff
+     * role; NOT YET IMPLEMENTED — see docs/backend-endpoints-missing.md.
+     */
+    availability: (id: string) => `/menu-items/${encodeURIComponent(id)}/availability`,
   },
   categories: {
     /** PATCH · DELETE — by id */
     byId: (id: string) => `/categories/${encodeURIComponent(id)}`,
+  },
+  staff: {
+    /**
+     * PATCH (update role) · DELETE (remove) — a staff member by id.
+     * NOT YET IMPLEMENTED by the backend — see docs/backend-endpoints-missing.md.
+     */
+    byId: (id: string) => `/staff/${encodeURIComponent(id)}`,
   },
 } as const;

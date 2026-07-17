@@ -12,56 +12,92 @@ import {
 import { useI18n } from "@/shared/i18n/I18nProvider";
 import { routes } from "@/shared/config/routes";
 import { Sidebar, MobileNav, BrandLogo, LanguagePicker, type NavItem } from "@/shared/ui";
+import { RoleSwitcher } from "@/features/auth/ui/RoleSwitcher";
+
+/**
+ * Which dashboard capabilities the current user has. A serializable projection
+ * of the permission model (resolved in the server layout via `can`), so the
+ * client nav shows exactly the sections the role may reach — nothing more.
+ */
+export interface DashboardCaps {
+  /** View the menu (and, for staff, toggle availability). */
+  menu: boolean;
+  /** Customize the public theme. */
+  theme: boolean;
+  /** Restaurant settings (languages, billing). */
+  settings: boolean;
+  /** Manage the restaurant's staff. */
+  staff: boolean;
+  /** Platform-wide: all restaurants (super admin). */
+  restaurants: boolean;
+}
 
 /**
  * Client nav for the dashboard. Icons (lucide components) can't be passed from
  * the server layout across the RSC boundary, so the item list is built here.
- * Labels/locale come from the i18n context; `isSuperAdmin` (a serializable flag
- * resolved in the server layout) gates the cross-tenant "All Restaurants" entry.
+ * Labels/locale come from the i18n context; `caps` (serializable, resolved in
+ * the server layout) gates every entry to the current role's permissions.
  */
-function useNavItems(isSuperAdmin: boolean): NavItem[] {
+function useNavItems(caps: DashboardCaps): NavItem[] {
   const { locale, dictionary: t } = useI18n();
   const items: NavItem[] = [
     { href: routes.dashboard(locale), label: t.dashboard.title, icon: LayoutDashboard, end: true },
   ];
-  if (isSuperAdmin) {
+  if (caps.restaurants) {
     items.push({
       href: routes.dashboardRestaurants(locale),
       label: t.dashboard.allRestaurants,
       icon: Building2,
     });
   }
-  items.push(
-    { href: routes.dashboardMenu(locale), label: t.dashboard.menu, icon: UtensilsCrossed },
-    { href: routes.dashboardTheme(locale), label: t.dashboard.themeBuilder, icon: Palette },
-    { href: routes.dashboardRestaurant(locale), label: t.dashboard.restaurant, icon: Store },
-    { href: routes.dashboardStaff(locale), label: t.dashboard.staff, icon: Users },
-    { href: routes.dashboardBilling(locale), label: t.dashboard.billing, icon: CreditCard },
-  );
+  if (caps.menu) {
+    items.push({ href: routes.dashboardMenu(locale), label: t.dashboard.menu, icon: UtensilsCrossed });
+  }
+  if (caps.theme) {
+    items.push({ href: routes.dashboardTheme(locale), label: t.dashboard.themeBuilder, icon: Palette });
+  }
+  if (caps.settings) {
+    items.push({ href: routes.dashboardRestaurant(locale), label: t.dashboard.restaurant, icon: Store });
+  }
+  if (caps.staff) {
+    items.push({ href: routes.dashboardStaff(locale), label: t.dashboard.staff, icon: Users });
+  }
+  if (caps.settings) {
+    items.push({ href: routes.dashboardBilling(locale), label: t.dashboard.billing, icon: CreditCard });
+  }
   return items;
 }
 
 /**
  * Sidebar with a language switcher (restricted to the restaurant's supported
- * languages) at the bottom. `LanguagePicker` renders nothing when only one
- * language is supported.
+ * languages) and — in demo/mock mode — a dev role switcher at the bottom.
+ * `LanguagePicker` renders nothing when only one language is supported.
  */
 export function DashboardSidebar({
   supportedLanguages,
-  isSuperAdmin,
+  caps,
+  role,
+  showRoleSwitcher,
 }: {
   supportedLanguages: string[];
-  isSuperAdmin: boolean;
+  caps: DashboardCaps;
+  role: string;
+  showRoleSwitcher: boolean;
 }) {
   return (
     <Sidebar
       brand={<BrandLogo />}
-      items={useNavItems(isSuperAdmin)}
-      footer={<LanguagePicker supportedCodes={supportedLanguages} className="w-full justify-between" />}
+      items={useNavItems(caps)}
+      footer={
+        <div className="flex flex-col gap-3">
+          <LanguagePicker supportedCodes={supportedLanguages} className="w-full justify-between" />
+          {showRoleSwitcher && <RoleSwitcher role={role} />}
+        </div>
+      }
     />
   );
 }
 
-export function DashboardMobileNav({ isSuperAdmin }: { isSuperAdmin: boolean }) {
-  return <MobileNav items={useNavItems(isSuperAdmin)} />;
+export function DashboardMobileNav({ caps }: { caps: DashboardCaps }) {
+  return <MobileNav items={useNavItems(caps)} />;
 }

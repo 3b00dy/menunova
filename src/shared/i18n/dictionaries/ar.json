@@ -45,7 +45,8 @@
       "actions": {
         "manageMenu": "إدارة القائمة",
         "customizeTheme": "تخصيص المظهر",
-        "languages": "اللغات"
+        "languages": "اللغات",
+        "manageStaff": "إدارة الموظفين"
       }
     },
     "menu": "القائمة",
@@ -91,6 +92,41 @@
       "defaultHint": "تُستخدم كبديل عندما لا تتوفّر ترجمة بلغة العميل.",
       "save": "حفظ التغييرات",
       "saved": "تم الحفظ"
+    },
+    "menuAdmin": {
+      "restaurant": "المطعم",
+      "noRestaurants": "لا توجد مطاعم بعد",
+      "noRestaurantsHint": "أنشئ مطعمًا أولًا، ثم أدِر قائمته من هنا."
+    },
+    "roles": {
+      "super_admin": "مدير النظام",
+      "owner": "مدير المطعم",
+      "staff": "موظّف المطعم"
+    },
+    "roleSwitcher": {
+      "label": "المعاينة بدور (تجريبي)"
+    },
+    "staffManager": {
+      "title": "الموظفون",
+      "subtitle": "ادعُ فريقك وحدّد صلاحيات كل عضو.",
+      "add": "دعوة موظف",
+      "newMember": "دعوة عضو جديد",
+      "memberName": "الاسم الكامل",
+      "namePlaceholder": "مثال: سارة كريم",
+      "email": "البريد الإلكتروني",
+      "emailPlaceholder": "name@restaurant.com",
+      "role": "الدور",
+      "roles": { "owner": "مدير المطعم", "staff": "موظّف" },
+      "statuses": { "active": "نشط", "invited": "مدعو" },
+      "roleHint": "يمكن للموظّف فقط تحديد توفّر الأصناف من عدمه. أما المدير فيدير المطعم بالكامل.",
+      "create": "إرسال الدعوة",
+      "cancel": "إلغاء",
+      "remove": "إزالة",
+      "removeTitle": "إزالة عضو",
+      "removeConfirm": "إزالة \"{name}\" من الفريق؟",
+      "removeNote": "سيفقد صلاحية الوصول إلى لوحة تحكم هذا المطعم. لا يمكن التراجع عن ذلك.",
+      "empty": "لا يوجد موظفون بعد.",
+      "emptyHint": "ادعُ أول عضو في فريقك للمساعدة في إدارة القائمة."
     }
   },
   "menu": {

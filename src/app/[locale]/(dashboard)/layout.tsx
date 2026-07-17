@@ -1,10 +1,10 @@
 import type { Locale } from "@/shared/i18n/config";
-import { getSession, hasRole } from "@/features/auth";
 import { getRestaurantSettings } from "@/features/restaurant";
 import {
   DashboardSidebar,
   DashboardMobileNav,
 } from "@/app/[locale]/(dashboard)/_components/DashboardNav";
+import { getDashboardAccess } from "@/app/[locale]/(dashboard)/_lib/access";
 
 const RESTAURANT_SLUG = "demo"; // TODO: derive from the authenticated user's restaurant
 
@@ -13,8 +13,9 @@ const RESTAURANT_SLUG = "demo"; // TODO: derive from the authenticated user's re
  *
  * Gating note: the `proxy` redirects unauthenticated users away from
  * `/dashboard`, but Server Actions bypass path gating — always re-check
- * authorization inside actions/pages via `@/features/auth` `requireRole`.
- * The `getServerSession` read here is the coarse layout-level guard.
+ * authorization inside actions/pages via `@/features/auth` (`requirePermission`).
+ * The capabilities resolved here only drive which nav entries are visible; they
+ * are NOT the security boundary.
  */
 export default async function DashboardLayout({
   children,
@@ -25,20 +26,22 @@ export default async function DashboardLayout({
 }) {
   // Narrow for parity with other routes; direction/labels come via i18n context.
   void ((await params) as { locale: Locale });
-  // Resolve the session: role drives the nav (super-admin sees All Restaurants).
-  const session = await getSession();
-  const isSuperAdmin = !!session && hasRole(session.user, "super_admin");
-  // Restaurant's supported languages drive the sidebar language switcher.
-  const settings = await getRestaurantSettings(RESTAURANT_SLUG);
+  // Role drives the nav; restaurant's supported languages drive the switcher.
+  const [{ caps, role, showRoleSwitcher }, settings] = await Promise.all([
+    getDashboardAccess(),
+    getRestaurantSettings(RESTAURANT_SLUG),
+  ]);
 
   return (
     <div className="flex flex-1">
       <DashboardSidebar
         supportedLanguages={settings.supportedLanguages}
-        isSuperAdmin={isSuperAdmin}
+        caps={caps}
+        role={role ?? "owner"}
+        showRoleSwitcher={showRoleSwitcher}
       />
       <div className="flex flex-1 flex-col min-w-0">
-        <DashboardMobileNav isSuperAdmin={isSuperAdmin} />
+        <DashboardMobileNav caps={caps} />
         <main className="flex-1 p-8">{children}</main>
       </div>
     </div>

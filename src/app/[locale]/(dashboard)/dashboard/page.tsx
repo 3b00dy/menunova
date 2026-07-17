@@ -2,8 +2,8 @@ import type { Locale } from "@/shared/i18n/config";
 import { getDictionary } from "@/shared/i18n/getDictionary";
 import { getMenu, computeMenuStats } from "@/features/menu";
 import { getRestaurantSettings, getRestaurantBySlug, type Restaurant } from "@/features/restaurant";
-import { getSession, hasRole } from "@/features/auth";
 import { DashboardOverview } from "@/app/[locale]/(dashboard)/dashboard/_components/DashboardOverview";
+import { getDashboardAccess } from "@/app/[locale]/(dashboard)/_lib/access";
 
 const RESTAURANT_SLUG = "demo"; // TODO: derive from the authenticated user's restaurant
 
@@ -16,15 +16,14 @@ export default async function DashboardHome({
   const { locale } = (await params) as { locale: Locale };
   const t = await getDictionary(locale);
 
-  const [menu, settings, restaurant, session] = await Promise.all([
+  const [menu, settings, restaurant, access] = await Promise.all([
     getMenu(RESTAURANT_SLUG),
     getRestaurantSettings(RESTAURANT_SLUG),
     getRestaurantBySlug(RESTAURANT_SLUG),
-    getSession(),
+    getDashboardAccess(),
   ]);
 
   const stats = computeMenuStats(menu, settings.supportedLanguages);
-  const isSuperAdmin = !!session && hasRole(session.user, "super_admin");
 
   // Fallback if the restaurant record is unavailable (backend down / empty).
   const account: Restaurant =
@@ -38,7 +37,7 @@ export default async function DashboardHome({
       stats={stats}
       dict={t.dashboard}
       locale={locale}
-      isSuperAdmin={isSuperAdmin}
+      caps={access.caps}
     />
   );
 }

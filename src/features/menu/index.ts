@@ -43,6 +43,7 @@ export {
   createMenuItem,
   updateMenuItem,
   deleteMenuItem,
+  setItemAvailability,
 } from "@/features/menu/application/item-actions";
 export {
   createCategory,
