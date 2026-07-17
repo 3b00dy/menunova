@@ -20,7 +20,7 @@ export const env = {
   apiUrl: required(
     "NEXT_PUBLIC_API_URL",
     process.env.NEXT_PUBLIC_API_URL,
-    "http://localhost:4000",
+    "https://menunovaapi.onrender.com",
   ),
   isProduction: process.env.NODE_ENV === "production",
   /**

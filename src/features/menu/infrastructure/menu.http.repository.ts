@@ -1,4 +1,5 @@
 import { httpClient } from "@/shared/http/httpClient";
+import { API_ENDPOINTS } from "@/shared/constants/api";
 import type {
   Category,
   CategoryDraft,
@@ -28,7 +29,7 @@ import {
 export class HttpMenuRepository implements MenuRepository {
   async getByRestaurantSlug(slug: string): Promise<Menu | null> {
     const dto = await httpClient.get<MenuDto>(
-      `/restaurants/${encodeURIComponent(slug)}/menu`,
+      API_ENDPOINTS.restaurants.menu(slug),
       { next: { revalidate: 60, tags: [`menu:${slug}`] } },
     );
     return toMenu(dto);
@@ -36,7 +37,7 @@ export class HttpMenuRepository implements MenuRepository {
 
   async createItem(slug: string, draft: MenuItemDraft, token: string): Promise<MenuItem> {
     const dto = await httpClient.post<ItemDto>(
-      `/restaurants/${encodeURIComponent(slug)}/menu-items`,
+      API_ENDPOINTS.restaurants.menuItems(slug),
       itemBody(draft),
       { token },
     );
@@ -45,7 +46,7 @@ export class HttpMenuRepository implements MenuRepository {
 
   async updateItem(id: MenuItemId, patch: MenuItemPatch, token: string): Promise<MenuItem> {
     const dto = await httpClient.patch<ItemDto>(
-      `/menu-items/${encodeURIComponent(id)}`,
+      API_ENDPOINTS.menuItems.byId(id),
       itemBody(patch),
       { token },
     );
@@ -53,12 +54,12 @@ export class HttpMenuRepository implements MenuRepository {
   }
 
   async deleteItem(id: MenuItemId, token: string): Promise<void> {
-    await httpClient.delete<void>(`/menu-items/${encodeURIComponent(id)}`, { token });
+    await httpClient.delete<void>(API_ENDPOINTS.menuItems.byId(id), { token });
   }
 
   async createCategory(slug: string, draft: CategoryDraft, token: string): Promise<Category> {
     const dto = await httpClient.post<CategoryDto>(
-      `/restaurants/${encodeURIComponent(slug)}/categories`,
+      API_ENDPOINTS.restaurants.categories(slug),
       { name: draft.name, position: draft.position },
       { token },
     );
@@ -67,7 +68,7 @@ export class HttpMenuRepository implements MenuRepository {
 
   async updateCategory(id: CategoryId, patch: CategoryPatch, token: string): Promise<Category> {
     const dto = await httpClient.patch<CategoryDto>(
-      `/categories/${encodeURIComponent(id)}`,
+      API_ENDPOINTS.categories.byId(id),
       { name: patch.name, position: patch.position },
       { token },
     );
@@ -75,7 +76,7 @@ export class HttpMenuRepository implements MenuRepository {
   }
 
   async deleteCategory(id: CategoryId, token: string): Promise<void> {
-    await httpClient.delete<void>(`/categories/${encodeURIComponent(id)}`, { token });
+    await httpClient.delete<void>(API_ENDPOINTS.categories.byId(id), { token });
   }
 }
 

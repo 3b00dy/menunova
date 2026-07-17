@@ -1,4 +1,5 @@
 import { httpClient } from "@/shared/http/httpClient";
+import { API_ENDPOINTS } from "@/shared/constants/api";
 import type {
   Restaurant,
   RestaurantDraft,
@@ -53,31 +54,35 @@ function toBody(patch: RestaurantPatch): Record<string, unknown> {
 export class HttpRestaurantRepository implements RestaurantRepository {
   async getBySlug(slug: string): Promise<Restaurant | null> {
     const dto = await httpClient.get<RestaurantDto | null>(
-      `/restaurants/${encodeURIComponent(slug)}`,
+      API_ENDPOINTS.restaurants.bySlug(slug),
     );
     return dto ? toRestaurant(dto) : null;
   }
 
   async getById(id: string): Promise<Restaurant | null> {
     const dto = await httpClient.get<RestaurantDto | null>(
-      `/restaurants/by-id/${encodeURIComponent(id)}`,
+      API_ENDPOINTS.restaurants.byId(id),
     );
     return dto ? toRestaurant(dto) : null;
   }
 
   async list(): Promise<Restaurant[]> {
-    const dtos = await httpClient.get<RestaurantDto[]>(`/restaurants`);
+    const dtos = await httpClient.get<RestaurantDto[]>(API_ENDPOINTS.restaurants.list);
     return dtos.map(toRestaurant);
   }
 
   async create(draft: RestaurantDraft, token: string): Promise<Restaurant> {
-    const dto = await httpClient.post<RestaurantDto>(`/restaurants`, toBody(draft), { token });
+    const dto = await httpClient.post<RestaurantDto>(
+      API_ENDPOINTS.restaurants.list,
+      toBody(draft),
+      { token },
+    );
     return toRestaurant(dto);
   }
 
   async update(id: string, patch: RestaurantPatch, token: string): Promise<Restaurant> {
     const dto = await httpClient.patch<RestaurantDto>(
-      `/restaurants/by-id/${encodeURIComponent(id)}`,
+      API_ENDPOINTS.restaurants.byId(id),
       toBody(patch),
       { token },
     );
@@ -85,6 +90,6 @@ export class HttpRestaurantRepository implements RestaurantRepository {
   }
 
   async delete(id: string, token: string): Promise<void> {
-    await httpClient.delete<void>(`/restaurants/by-id/${encodeURIComponent(id)}`, { token });
+    await httpClient.delete<void>(API_ENDPOINTS.restaurants.byId(id), { token });
   }
 }
