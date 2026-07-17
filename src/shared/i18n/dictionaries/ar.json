@@ -12,6 +12,42 @@
   },
   "dashboard": {
     "title": "لوحة التحكم",
+    "overview": {
+      "subtitle": "إليك حالة قائمتك وحسابك.",
+      "kpis": {
+        "categories": "التصنيفات",
+        "items": "أصناف القائمة",
+        "available": "متوفّر",
+        "outOfStock": "غير متوفّر"
+      },
+      "sections": {
+        "itemsByCategory": "الأصناف حسب التصنيف",
+        "availability": "التوفّر",
+        "completeness": "اكتمال القائمة",
+        "account": "الحساب"
+      },
+      "emptyMenu": "لا توجد أصناف بعد — أضِف أول تصنيف وأصناف.",
+      "pricing": {
+        "average": "متوسّط السعر",
+        "range": "نطاق الأسعار"
+      },
+      "completenessHint": "الأصناف المترجمة لكل لغة",
+      "overall": "مُترجَم بالكامل",
+      "availability_available": "متوفّر",
+      "availability_soldOut": "نفد",
+      "account": {
+        "slug": "معرّف الرابط",
+        "languages": "اللغات",
+        "owner": "المالك",
+        "created": "تاريخ الإنشاء",
+        "viewPublicMenu": "عرض القائمة العامة"
+      },
+      "actions": {
+        "manageMenu": "إدارة القائمة",
+        "customizeTheme": "تخصيص المظهر",
+        "languages": "اللغات"
+      }
+    },
     "menu": "القائمة",
     "restaurant": "المطعم",
     "staff": "الموظفون",

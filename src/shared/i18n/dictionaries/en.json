@@ -12,6 +12,42 @@
   },
   "dashboard": {
     "title": "Dashboard",
+    "overview": {
+      "subtitle": "Here's how your menu and account are doing.",
+      "kpis": {
+        "categories": "Categories",
+        "items": "Menu items",
+        "available": "Available",
+        "outOfStock": "Out of stock"
+      },
+      "sections": {
+        "itemsByCategory": "Items by category",
+        "availability": "Availability",
+        "completeness": "Menu completeness",
+        "account": "Account"
+      },
+      "emptyMenu": "No menu items yet — add your first category and items.",
+      "pricing": {
+        "average": "Average price",
+        "range": "Price range"
+      },
+      "completenessHint": "Items translated per language",
+      "overall": "Fully translated",
+      "availability_available": "Available",
+      "availability_soldOut": "Sold out",
+      "account": {
+        "slug": "URL slug",
+        "languages": "Languages",
+        "owner": "Owner",
+        "created": "Created",
+        "viewPublicMenu": "View public menu"
+      },
+      "actions": {
+        "manageMenu": "Manage menu",
+        "customizeTheme": "Customize theme",
+        "languages": "Languages"
+      }
+    },
     "menu": "Menu",
     "restaurant": "Restaurant",
     "staff": "Staff",

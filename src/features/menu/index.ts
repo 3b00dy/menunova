@@ -27,6 +27,15 @@ export type {
   MenuViewLabels,
 } from "@/features/menu/domain/menu-view";
 
+// Insights (pure derivations over a Menu)
+export type {
+  MenuStats,
+  CategoryCount,
+  PriceStats,
+  CoverageStats,
+} from "@/features/menu/domain/menu.stats";
+export { computeMenuStats } from "@/features/menu/domain/menu.stats";
+
 // Use-cases
 export { getMenu } from "@/features/menu/application/get-menu";
 export { getMenuView } from "@/features/menu/application/get-menu-view";
