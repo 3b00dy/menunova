@@ -49,10 +49,51 @@ function seedDemo(): MenuStore {
   };
 }
 
+function seedSakura(): MenuStore {
+  return {
+    slug: "sakura-sushi",
+    categories: [
+      { id: "sk_nigiri", name: { en: "Nigiri", ar: "نيغيري" }, position: 0 },
+      { id: "sk_rolls", name: { en: "Signature Rolls", ar: "لفائف مميّزة" }, position: 1 },
+      { id: "sk_ramen", name: { en: "Ramen", ar: "رامن" }, position: 2 },
+    ],
+    items: [
+      { id: "sk_salmon", categoryId: "sk_nigiri", name: { en: "Salmon Nigiri", ar: "سلمون نيغيري" }, description: { en: "Two pieces, wild-caught salmon.", ar: "قطعتان من السلمون البرّي." }, price: money(20), available: true, imageUrl: "https://images.unsplash.com/photo-1579584425555-c3ce17fd4351?w=400&h=300&fit=crop" },
+      { id: "sk_tuna", categoryId: "sk_nigiri", name: { en: "Tuna Nigiri", ar: "تونا نيغيري" }, description: { en: "Two pieces, bluefin tuna.", ar: "قطعتان من تونا الزعنفة الزرقاء." }, price: money(24), available: true },
+      { id: "sk_dragon", categoryId: "sk_rolls", name: { en: "Dragon Roll", ar: "لفيفة التنّين" }, description: { en: "Eel, avocado, cucumber.", ar: "أنقليس وأفوكادو وخيار." }, price: money(38), available: true, imageUrl: "https://images.unsplash.com/photo-1617196034796-73dfa7b1fd56?w=400&h=300&fit=crop" },
+      { id: "sk_ramen1", categoryId: "sk_ramen", name: { en: "Tonkotsu Ramen", ar: "رامن تونكوتسو" }, description: { en: "Pork broth, soft egg, chashu.", ar: "مرق لحم وبيضة طريّة وتشاشو." }, price: money(45), available: false },
+    ],
+  };
+}
+
+function seedSmash(): MenuStore {
+  return {
+    slug: "smash-house",
+    categories: [
+      { id: "sm_burgers", name: { en: "Burgers", ar: "برغر" }, position: 0 },
+      { id: "sm_sides", name: { en: "Sides", ar: "أطباق جانبية" }, position: 1 },
+      { id: "sm_shakes", name: { en: "Shakes", ar: "ميلك شيك" }, position: 2 },
+    ],
+    items: [
+      { id: "sm_classic", categoryId: "sm_burgers", name: { en: "The Classic", ar: "الكلاسيكي" }, description: { en: "Single smash, American cheese, house sauce.", ar: "قطعة لحم وجبنة أمريكية وصلصة البيت." }, price: money(30), available: true, imageUrl: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=400&h=300&fit=crop" },
+      { id: "sm_double", categoryId: "sm_burgers", name: { en: "Double Trouble", ar: "دبل ترابل" }, description: { en: "Double smash, double cheese, pickles.", ar: "قطعتا لحم وجبنة مضاعفة ومخلّل." }, price: money(42), available: true },
+      { id: "sm_fries", categoryId: "sm_sides", name: { en: "Loaded Fries", ar: "بطاطا محمّلة" }, description: { en: "Cheese sauce, jalapeños, scallions.", ar: "صلصة جبن وهالبينو وبصل أخضر." }, price: money(18), available: true },
+      { id: "sm_shake", categoryId: "sm_shakes", name: { en: "Oreo Shake", ar: "ميلك شيك أوريو" }, description: { en: "Thick vanilla shake, crushed Oreo.", ar: "شيك فانيلا كثيف مع أوريو مطحون." }, price: money(16), available: true },
+    ],
+  };
+}
+
+/** Per-slug seed factories — restaurants not listed start with an empty menu. */
+const SEEDS: Record<string, () => MenuStore> = {
+  demo: seedDemo,
+  "sakura-sushi": seedSakura,
+  "smash-house": seedSmash,
+};
+
 function storeFor(slug: string): MenuStore {
   let store = STORES.get(slug);
   if (!store) {
-    store = slug === "demo" ? seedDemo() : { slug, categories: [], items: [] };
+    store = SEEDS[slug]?.() ?? { slug, categories: [], items: [] };
     STORES.set(slug, store);
   }
   return store;

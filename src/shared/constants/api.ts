@@ -47,6 +47,12 @@ export const API_ENDPOINTS = {
     languageSettings: (slug: string) =>
       `/restaurants/${encodeURIComponent(slug)}/settings/languages`,
     /**
+     * GET · PUT — a restaurant's public-menu theme (design) JSON.
+     * NOT YET IMPLEMENTED by the backend — see docs/missed-endpoints.md.
+     */
+    themeSettings: (slug: string) =>
+      `/restaurants/${encodeURIComponent(slug)}/settings/theme`,
+    /**
      * GET (list) · POST (invite) — a restaurant's staff members.
      * NOT YET IMPLEMENTED by the backend — see docs/backend-endpoints-missing.md.
      */

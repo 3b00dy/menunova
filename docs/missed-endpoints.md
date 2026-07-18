@@ -82,7 +82,7 @@ team). Gated by `staff:manage` (owner, super_admin); scoped to `{slug}`.
 |---|---|---|---|
 | `POST` | `/auth/register` | Real backend signup (would replace the BFF route) | optional — BFF covers it today |
 | `PATCH` | `/menu-items/{id}/availability` | Narrow availability-only toggle for staff | optional — general `PATCH /menu-items/{id}` works |
-| `GET`/`PUT` | `/restaurants/{slug}/settings/theme` | Persist the Theme Builder config | future — Theme Builder is preview-only today |
+| `GET`/`PUT` | `/restaurants/{slug}/settings/theme` | Persist a restaurant's public-menu theme (design) JSON | **wired** on the frontend (Theme Builder saves per restaurant); backend endpoint still needed for live persistence |
 
 ---
 

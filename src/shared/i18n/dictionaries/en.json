@@ -377,6 +377,9 @@
     "title": "Theme Builder",
     "subtitle": "Customize how your public menu looks. Every change previews live.",
     "reset": "Reset to default",
+    "save": "Save theme",
+    "saving": "Saving…",
+    "saved": "Saved",
     "sections": {
       "presets": "Admin presets",
       "presetsHint": "Start from a system theme, then fine-tune.",

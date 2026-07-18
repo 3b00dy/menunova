@@ -1,17 +1,16 @@
+import { notFound } from "next/navigation";
 import type { Locale } from "@/shared/i18n/config";
 import { getDictionary } from "@/shared/i18n/getDictionary";
-import { DEFAULT_THEME_CONFIG } from "@/shared/theme/tenant-config";
+import { getRestaurantTheme } from "@/features/restaurant";
 import { getMenuView, PublicMenu, type MenuViewLabels } from "@/features/menu";
 
 /**
  * Public per-tenant menu — "/{locale}/r/{restaurantSlug}".
  *
- * Composition root: resolve the menu (mock today) + the tenant theme, then
+ * Composition root: resolve the restaurant's OWN menu + its saved theme, then
  * render `PublicMenu` — the same `RestaurantMenu` the Theme Builder previews,
- * plus a customer layout switcher. `params` is async (Next.js 16).
- *
- * TODO: load the real `ThemeConfig` from the restaurant's theme settings once
- * the backend ships; `DEFAULT_THEME_CONFIG` is the placeholder.
+ * plus a customer layout switcher. `params` is async (Next.js 16). `/r/demo`
+ * keeps showing the rich sample; every other slug renders that tenant's data.
  */
 export default async function PublicMenuPage({
   params,
@@ -23,7 +22,11 @@ export default async function PublicMenuPage({
     restaurantSlug: string;
   };
   const t = await getDictionary(locale);
-  const menu = await getMenuView(restaurantSlug);
+  const [menu, theme] = await Promise.all([
+    getMenuView(restaurantSlug, locale),
+    getRestaurantTheme(restaurantSlug),
+  ]);
+  if (!menu) notFound();
 
   const labels: MenuViewLabels = {
     categories: t.menu.categories,
@@ -48,7 +51,7 @@ export default async function PublicMenuPage({
 
   return (
     <PublicMenu
-      theme={DEFAULT_THEME_CONFIG}
+      theme={theme}
       data={menu}
       labels={labels}
       chrome={chrome}

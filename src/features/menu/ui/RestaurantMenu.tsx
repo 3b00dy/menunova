@@ -234,16 +234,20 @@ function MenuHeader({
           >
             {restaurant.name}
           </h1>
-          <p className="truncate text-xs" style={{ color: "var(--pv-secondary)" }}>
-            {restaurant.tagline}
-          </p>
+          {restaurant.tagline && (
+            <p className="truncate text-xs" style={{ color: "var(--pv-secondary)" }}>
+              {restaurant.tagline}
+            </p>
+          )}
         </div>
       </div>
       <div className="flex flex-wrap items-center gap-x-3 gap-y-1 px-5 pb-4 text-xs">
-        <span className="inline-flex items-center gap-1.5" style={{ color: "var(--pv-secondary)" }}>
-          <Clock className="h-3.5 w-3.5" />
-          {restaurant.hoursOpen} – {restaurant.hoursClose}
-        </span>
+        {(restaurant.hoursOpen || restaurant.hoursClose) && (
+          <span className="inline-flex items-center gap-1.5" style={{ color: "var(--pv-secondary)" }}>
+            <Clock className="h-3.5 w-3.5" />
+            {restaurant.hoursOpen} – {restaurant.hoursClose}
+          </span>
+        )}
         <span
           className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 font-medium"
           style={{ backgroundColor: "var(--pv-primary-soft)", color: "var(--pv-primary)" }}
