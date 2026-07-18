@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { requirePermission } from "@/features/auth";
 import type { RestaurantSettings } from "@/features/restaurant/domain/restaurant-settings.entity";
-import { restaurantSettingsMockRepository } from "@/features/restaurant/infrastructure/restaurant-settings.mock";
+import { restaurantSettingsRepository } from "@/features/restaurant/infrastructure/restaurant-settings.repository";
 
 /**
  * Update which languages a restaurant supports. Server Action — authorization is
@@ -17,12 +17,16 @@ export async function updateRestaurantLanguages(input: {
   defaultLanguage: string;
   supportedLanguages: string[];
 }): Promise<RestaurantSettings> {
-  await requirePermission("settings:manage");
+  const { token } = await requirePermission("settings:manage");
 
-  const settings = await restaurantSettingsMockRepository.updateLanguages(input.slug, {
-    defaultLanguage: input.defaultLanguage,
-    supportedLanguages: input.supportedLanguages,
-  });
+  const settings = await restaurantSettingsRepository.updateLanguages(
+    input.slug,
+    {
+      defaultLanguage: input.defaultLanguage,
+      supportedLanguages: input.supportedLanguages,
+    },
+    token,
+  );
 
   revalidatePath(`/${input.locale}/dashboard`, "layout");
   return settings;

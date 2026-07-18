@@ -39,10 +39,10 @@ export class HttpStaffRepository implements StaffRepository {
     return dtos.map(toStaff);
   }
 
-  async invite(restaurantId: string, draft: StaffDraft, token: string): Promise<StaffMember> {
+  async create(restaurantId: string, draft: StaffDraft, token: string): Promise<StaffMember> {
     const dto = await httpClient.post<StaffDto>(
       API_ENDPOINTS.restaurants.staff(restaurantId),
-      { email: draft.email, name: draft.name, role: draft.role },
+      { email: draft.email, name: draft.name, role: draft.role, password: draft.password },
       { token },
     );
     return toStaff(dto);

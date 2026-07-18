@@ -21,22 +21,22 @@ import {
   type StaffRole,
 } from "@/features/staff/domain/staff.entity";
 import {
-  inviteStaff,
+  createStaff,
   removeStaff,
   updateStaff,
 } from "@/features/staff/application/staff-actions";
 
 type Dialog =
-  | { type: "invite" }
+  | { type: "create" }
   | { type: "remove"; id: string; name: string }
   | null;
 
 /**
- * Restaurant-admin staff manager: invite team members, change their role, and
- * remove them. A member's role decides their capabilities — `owner` (admin) can
- * manage everything; `staff` can only toggle item availability. Gated to the
- * `staff:manage` capability both here (the page won't render it otherwise) and
- * inside every Server Action it calls.
+ * Restaurant-admin staff manager: create team members (a real login with an
+ * initial password), change their role, and remove them. A member's role decides
+ * their capabilities — `owner` (admin) can manage everything; `staff` can only
+ * toggle item availability. Gated to the `staff:manage` capability both here (the
+ * page won't render it otherwise) and inside every Server Action it calls.
  */
 export function StaffManager({
   staff,
@@ -71,7 +71,7 @@ export function StaffManager({
     <section className="flex flex-col gap-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <p className="max-w-prose text-sm text-[rgb(var(--color-muted))]">{s.roleHint}</p>
-        <Button onClick={() => setDialog({ type: "invite" })}>
+        <Button onClick={() => setDialog({ type: "create" })}>
           <UserPlus className="h-4 w-4" />
           {s.add}
         </Button>
@@ -89,7 +89,7 @@ export function StaffManager({
           title={s.empty}
           description={s.emptyHint}
           action={
-            <Button onClick={() => setDialog({ type: "invite" })}>
+            <Button onClick={() => setDialog({ type: "create" })}>
               <UserPlus className="h-4 w-4" />
               {s.add}
             </Button>
@@ -164,12 +164,12 @@ export function StaffManager({
         </Card>
       )}
 
-      {dialog?.type === "invite" && (
-        <InviteForm
+      {dialog?.type === "create" && (
+        <CreateStaffForm
           labels={s}
           pending={pending}
           onClose={() => setDialog(null)}
-          onSubmit={(draft) => run(() => inviteStaff({ locale, restaurantId, draft }))}
+          onSubmit={(draft) => run(() => createStaff({ locale, restaurantId, draft }))}
         />
       )}
 
@@ -205,7 +205,7 @@ export function StaffManager({
 
 type Labels = ReturnType<typeof useI18n>["dictionary"]["dashboard"]["staffManager"];
 
-function InviteForm({
+function CreateStaffForm({
   labels: s,
   pending,
   onClose,
@@ -218,10 +218,12 @@ function InviteForm({
 }) {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [role, setRole] = useState<StaffRole>("staff");
 
   const validEmail = /.+@.+\..+/.test(email.trim());
-  const valid = name.trim() !== "" && validEmail;
+  const validPassword = password.length >= 8;
+  const valid = name.trim() !== "" && validEmail && validPassword;
 
   return (
     <Modal
@@ -235,7 +237,7 @@ function InviteForm({
           </Button>
           <Button
             disabled={!valid || pending}
-            onClick={() => onSubmit({ name: name.trim(), email: email.trim(), role })}
+            onClick={() => onSubmit({ name: name.trim(), email: email.trim(), password, role })}
           >
             {s.create}
           </Button>
@@ -257,6 +259,15 @@ function InviteForm({
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder={s.emailPlaceholder}
+          />
+        </Field>
+        <Field label={s.password} hint={password && !validPassword ? s.passwordHint : undefined}>
+          <Input
+            type="password"
+            autoComplete="new-password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="••••••••"
           />
         </Field>
         <Field label={s.role} hint={role === "staff" ? s.roleHint : undefined}>

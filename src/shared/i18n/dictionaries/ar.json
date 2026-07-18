@@ -3,12 +3,118 @@
     "appName": "مينونوفا",
     "getStarted": "ابدأ الآن",
     "signIn": "تسجيل الدخول",
-    "loading": "جارٍ التحميل…"
+    "loading": "جارٍ التحميل…",
+    "back": "رجوع",
+    "continue": "متابعة"
   },
   "marketing": {
     "heroTitle": "قوائم طعام رقمية جميلة لكل مطعم",
     "heroSubtitle": "أنشئ قائمتك وترجمها وشاركها في دقائق.",
     "seePricing": "عرض الأسعار"
+  },
+  "auth": {
+    "signIn": "تسجيل الدخول",
+    "createAccount": "أنشئ حسابك",
+    "registerSubtitle": "جهّز مطعمك وابدأ ببناء قائمتك.",
+    "yourName": "اسمك",
+    "yourNamePlaceholder": "مثال: ليلى حسن",
+    "restaurantName": "اسم المطعم",
+    "restaurantNamePlaceholder": "مثال: بيتزا توني",
+    "email": "البريد الإلكتروني",
+    "password": "كلمة المرور",
+    "signInCta": "تسجيل الدخول",
+    "registerCta": "إنشاء مطعمي",
+    "haveAccount": "لديك حساب بالفعل؟",
+    "noAccount": "جديد في مينونوفا؟",
+    "signInLink": "تسجيل الدخول",
+    "registerLink": "إنشاء حساب",
+    "logout": "تسجيل الخروج",
+    "errors": {
+      "invalidCredentials": "بريد إلكتروني أو كلمة مرور غير صحيحة.",
+      "emailTaken": "هذا البريد الإلكتروني مسجّل بالفعل.",
+      "required": "يرجى تعبئة جميع الحقول.",
+      "registerFailed": "تعذّر إنشاء حسابك. حاول مرة أخرى."
+    }
+  },
+  "onboarding": {
+    "header": { "haveAccount": "لديك حساب بالفعل؟", "signIn": "تسجيل الدخول" },
+    "steps": { "account": "الحساب", "plan": "الباقة", "restaurant": "المطعم", "theme": "المظهر", "payment": "الدفع" },
+    "account": {
+      "title": "أنشئ حسابك",
+      "subtitle": "ستكون مدير مطعمك.",
+      "fullName": "اسمك",
+      "fullNamePlaceholder": "مثال: ليلى حسن",
+      "email": "البريد الإلكتروني",
+      "emailPlaceholder": "you@example.com",
+      "password": "كلمة المرور",
+      "passwordHint": "٨ أحرف على الأقل.",
+      "confirmPassword": "تأكيد كلمة المرور",
+      "passwordMismatch": "كلمتا المرور غير متطابقتين.",
+      "terms": "بالمتابعة فإنك توافق على الشروط وسياسة الخصوصية."
+    },
+    "plan": {
+      "title": "اختر باقتك",
+      "subtitle": "ابدأ مجانًا — ويمكنك الترقية في أي وقت.",
+      "recommended": "الأكثر شيوعًا",
+      "perMonth": "/شهريًا",
+      "free": "مجاني",
+      "items": {
+        "free": { "tagline": "للبداية", "features": ["قائمة مطعم واحدة", "قائمة برمز QR", "حتى لغتين"] },
+        "pro": { "tagline": "للمطاعم النامية", "features": ["أصناف غير محدودة", "تخصيص المظهر", "تعدد اللغات ودعم RTL", "توفّر فوري"] },
+        "enterprise": { "tagline": "للعلامات متعددة الفروع", "features": ["كل ميزات الاحترافي", "دعم بالأولوية", "علامة مخصّصة", "تحليلات متقدمة"] }
+      }
+    },
+    "restaurant": {
+      "title": "جهّز مطعمك",
+      "subtitle": "هذا ما سيراه عملاؤك.",
+      "name": "اسم المطعم",
+      "namePlaceholder": "مثال: بيتزا توني",
+      "slug": "رابط القائمة",
+      "slugHint": "عنوان قائمتك العامة. أحرف وأرقام وشرطات.",
+      "logo": "رابط الشعار",
+      "logoHint": "اختياري. الصق رابط صورة شعارك.",
+      "languages": "لغات القائمة",
+      "languagesHint": "اختر اللغات التي تُقدَّم بها قائمتك.",
+      "defaultLanguage": "اللغة الافتراضية"
+    },
+    "theme": {
+      "title": "اختر لون علامتك",
+      "subtitle": "حدّد اللون المميّز لقائمتك العامة. يمكنك ضبط كل شيء لاحقًا من منشئ الأنماط.",
+      "brandColor": "لون العلامة",
+      "customColor": "لون مخصّص"
+    },
+    "payment": {
+      "title": "التأكيد والإنشاء",
+      "subtitle": "الدفع تجريبي في هذا العرض — لن تُخصم أي بطاقة.",
+      "sectionTitle": "تفاصيل الدفع",
+      "cardholder": "اسم حامل البطاقة",
+      "cardholderPlaceholder": "الاسم على البطاقة",
+      "cardNumber": "رقم البطاقة",
+      "expiry": "تاريخ الانتهاء",
+      "cvc": "CVC",
+      "demoNote": "دفع تجريبي — استخدم أي رقم بطاقة.",
+      "summary": "الملخّص",
+      "summarySub": "راجع قبل إنشاء مطعمك.",
+      "planLabel": "الباقة",
+      "restaurantLabel": "المطعم",
+      "menuUrl": "رابط القائمة",
+      "languageLabel": "اللغة الافتراضية",
+      "themeLabel": "لون العلامة",
+      "dueToday": "المستحق اليوم",
+      "free": "مجاني",
+      "pay": "إنشاء مطعمي",
+      "processing": "جارٍ الإنشاء…"
+    },
+    "success": {
+      "title": "كل شيء جاهز!",
+      "subtitle": "جارٍ نقلك إلى لوحة التحكم…"
+    },
+    "errors": {
+      "slug_taken": "رابط القائمة هذا مستخدم بالفعل. اختر رابطًا آخر.",
+      "email_taken": "هذا البريد الإلكتروني مسجّل بالفعل.",
+      "required": "يرجى إكمال جميع الحقول المطلوبة.",
+      "generic": "حدث خطأ ما. حاول مرة أخرى."
+    }
   },
   "dashboard": {
     "title": "لوحة التحكم",
@@ -98,6 +204,25 @@
       "noRestaurants": "لا توجد مطاعم بعد",
       "noRestaurantsHint": "أنشئ مطعمًا أولًا، ثم أدِر قائمته من هنا."
     },
+    "platform": {
+      "title": "نظرة عامة على المنصة",
+      "subtitle": "حالة كل مطعم على مينونوفا.",
+      "kpis": {
+        "restaurants": "المطاعم",
+        "active": "نشِط",
+        "trial": "تجريبي",
+        "suspended": "معلّق",
+        "menuItems": "أصناف القائمة",
+        "categories": "التصنيفات"
+      },
+      "sections": {
+        "byPlan": "المطاعم حسب الباقة",
+        "byStatus": "المطاعم حسب الحالة",
+        "recent": "أُضيفت مؤخرًا"
+      },
+      "actions": { "manageRestaurants": "إدارة المطاعم", "viewAll": "عرض الكل" },
+      "recent": { "empty": "لا توجد مطاعم بعد.", "view": "عرض القائمة" }
+    },
     "roles": {
       "super_admin": "مدير النظام",
       "owner": "مدير المطعم",
@@ -108,25 +233,27 @@
     },
     "staffManager": {
       "title": "الموظفون",
-      "subtitle": "ادعُ فريقك وحدّد صلاحيات كل عضو.",
-      "add": "دعوة موظف",
-      "newMember": "دعوة عضو جديد",
+      "subtitle": "أنشئ حسابات لفريقك وحدّد صلاحيات كل عضو.",
+      "add": "إضافة موظف",
+      "newMember": "موظف جديد",
       "memberName": "الاسم الكامل",
       "namePlaceholder": "مثال: سارة كريم",
       "email": "البريد الإلكتروني",
       "emailPlaceholder": "name@restaurant.com",
+      "password": "كلمة المرور",
+      "passwordHint": "٨ أحرف على الأقل.",
       "role": "الدور",
       "roles": { "owner": "مدير المطعم", "staff": "موظّف" },
       "statuses": { "active": "نشط", "invited": "مدعو" },
       "roleHint": "يمكن للموظّف فقط تحديد توفّر الأصناف من عدمه. أما المدير فيدير المطعم بالكامل.",
-      "create": "إرسال الدعوة",
+      "create": "إنشاء الحساب",
       "cancel": "إلغاء",
       "remove": "إزالة",
       "removeTitle": "إزالة عضو",
       "removeConfirm": "إزالة \"{name}\" من الفريق؟",
       "removeNote": "سيفقد صلاحية الوصول إلى لوحة تحكم هذا المطعم. لا يمكن التراجع عن ذلك.",
       "empty": "لا يوجد موظفون بعد.",
-      "emptyHint": "ادعُ أول عضو في فريقك للمساعدة في إدارة القائمة."
+      "emptyHint": "أضِف أول عضو في فريقك للمساعدة في إدارة القائمة."
     }
   },
   "menu": {

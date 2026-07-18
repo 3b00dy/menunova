@@ -54,6 +54,8 @@ export class InMemoryRestaurantRepository implements RestaurantRepository {
       ownerEmail: draft.ownerEmail?.trim() || undefined,
       plan: draft.plan,
       status: draft.status,
+      logoUrl: draft.logoUrl?.trim() || undefined,
+      brandColor: draft.brandColor?.trim() || undefined,
     };
     RESTAURANTS.push(restaurant);
     return clone(restaurant);

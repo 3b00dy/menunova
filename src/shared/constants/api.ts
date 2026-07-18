@@ -16,6 +16,16 @@ export const API_BASE_URL = env.apiUrl;
  * URL-encode them; constants are plain strings. HTTP verbs noted in comments.
  */
 export const API_ENDPOINTS = {
+  auth: {
+    /** POST — email/password → { token, user }. NOT YET IMPLEMENTED (see docs). */
+    login: "/auth/login",
+    /** POST — create user (+ provision restaurant) → { token, user }. NOT YET IMPLEMENTED. */
+    register: "/auth/register",
+    /** GET — verify bearer token → current { token, user }. NOT YET IMPLEMENTED. */
+    me: "/auth/me",
+    /** POST — invalidate the current token. NOT YET IMPLEMENTED. */
+    logout: "/auth/logout",
+  },
   restaurants: {
     /** GET (list all) · POST (create) */
     list: "/restaurants",

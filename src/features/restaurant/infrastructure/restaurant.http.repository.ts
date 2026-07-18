@@ -48,6 +48,8 @@ function toBody(patch: RestaurantPatch): Record<string, unknown> {
   if (patch.ownerEmail !== undefined) body.owner_email = patch.ownerEmail ?? null;
   if (patch.plan !== undefined) body.plan = patch.plan;
   if (patch.status !== undefined) body.status = patch.status;
+  if (patch.logoUrl !== undefined) body.logo_url = patch.logoUrl ?? null;
+  if (patch.brandColor !== undefined) body.brand_color = patch.brandColor ?? null;
   return body;
 }
 

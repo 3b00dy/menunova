@@ -1,6 +1,6 @@
 import type { RestaurantSettings } from "@/features/restaurant/domain/restaurant-settings.entity";
 import type { RestaurantSettingsRepository } from "@/features/restaurant/domain/restaurant-settings.ports";
-import { restaurantSettingsMockRepository } from "@/features/restaurant/infrastructure/restaurant-settings.mock";
+import { restaurantSettingsRepository } from "@/features/restaurant/infrastructure/restaurant-settings.repository";
 
 /**
  * Resolve a restaurant's settings (languages). Resilient: on any failure it
@@ -9,7 +9,7 @@ import { restaurantSettingsMockRepository } from "@/features/restaurant/infrastr
  */
 export async function getRestaurantSettings(
   slug: string,
-  repo: RestaurantSettingsRepository = restaurantSettingsMockRepository,
+  repo: RestaurantSettingsRepository = restaurantSettingsRepository,
 ): Promise<RestaurantSettings> {
   try {
     return await repo.get(slug);

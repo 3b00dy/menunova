@@ -58,6 +58,30 @@ Response `200`:
 ```
 `401` on bad credentials.
 
+### `POST /auth/register`  _(self-serve signup + tenant provisioning)_
+Creates the owner account **and** provisions their restaurant + language settings in one call, returning a logged-in session. Driven by the multi-step onboarding wizard; the frontend sends the owner-chosen `slug` (it must not be silently changed — return `409` on conflict).
+Request:
+```json
+{
+  "email": "owner@tonys.test",
+  "password": "…",
+  "name": "Tony Roma",
+  "restaurant": {
+    "name": "Tony's Pizza",
+    "slug": "tonys-pizza",
+    "plan": "free",
+    "status": "trial",
+    "logo_url": "https://…",        // optional
+    "brand_color": "#D97706"        // optional
+  },
+  "settings": {
+    "default_language": "en",
+    "supported_languages": ["en", "ar"]
+  }
+}
+```
+Response `201`: the same `{ token, user }` shape as login (with `role: "owner"` and `restaurant_id` set). `409` if the email or slug is already taken. The backend should also persist the restaurant's language settings so `GET /restaurants/{slug}/settings/languages` reflects the choices immediately.
+
 ### `GET /auth/me`  _(token verification)_
 Returns the current user for a bearer token, so the frontend can resolve the session on each request. Wired into `getSession()` (currently a TODO).
 Response `200`: the same `user` object as above. `401` if the token is invalid/expired.
@@ -88,13 +112,14 @@ Lets a restaurant admin invite / re-role / remove team members. Only `staff:mana
 ### `GET /restaurants/{slug}/staff`
 List the restaurant's staff. Response `200`: `staff[]`.
 
-### `POST /restaurants/{slug}/staff`  _(invite)_
+### `POST /restaurants/{slug}/staff`  _(create user)_
+The admin **creates the account directly** (sets an initial password) — this is not an email invitation. The member is `active` immediately, and the backend MUST create a login for them (email + password + `role` + this restaurant's `restaurant_id`), so the person can sign in via `/auth/login`.
 Request:
 ```json
-{ "email": "sara@pizzapalace.test", "name": "Sara Karim", "role": "staff" }
+{ "email": "sara@pizzapalace.test", "name": "Sara Karim", "role": "staff", "password": "…" }
 ```
-Creates the member with `status: "invited"` (ideally emails an invite). Response `201`: the created `staff`.
-`409` if the email already belongs to the restaurant's team.
+Response `201`: the created `staff` (with `status: "active"`).
+`409` if the email already belongs to the restaurant's team (or to any user).
 
 ### `PATCH /staff/{id}`  _(change role / name)_
 Request (any subset):
@@ -134,13 +159,14 @@ If you implement it, the frontend's `setItemAvailability` action ([`item-actions
 | # | Method | Path | Gated by | Status |
 |---|---|---|---|---|
 | 1 | POST | `/auth/login` | public | **missing — blocking** |
-| 2 | GET | `/auth/me` | any authed | **missing — blocking** |
-| 3 | POST | `/auth/logout` | any authed | **missing** |
-| 4 | GET | `/restaurants/{slug}/staff` | `staff:manage` | **missing — blocking (staff)** |
-| 5 | POST | `/restaurants/{slug}/staff` | `staff:manage` | **missing — blocking (staff)** |
-| 6 | PATCH | `/staff/{id}` | `staff:manage` | **missing — blocking (staff)** |
-| 7 | DELETE | `/staff/{id}` | `staff:manage` | **missing — blocking (staff)** |
-| 8 | PATCH | `/menu-items/{id}/availability` | `menu:availability` | optional |
-| 9 | GET/PUT | `/restaurants/{slug}/settings/theme` | `settings:manage` | future |
+| 2 | POST | `/auth/register` | public | **missing — blocking (self-serve signup)** |
+| 3 | GET | `/auth/me` | any authed | **missing — blocking** |
+| 4 | POST | `/auth/logout` | any authed | **missing** |
+| 5 | GET | `/restaurants/{slug}/staff` | `staff:manage` | **missing — blocking (staff)** |
+| 6 | POST | `/restaurants/{slug}/staff` | `staff:manage` | **missing — creates staff + login (password)** |
+| 7 | PATCH | `/staff/{id}` | `staff:manage` | **missing — blocking (staff)** |
+| 8 | DELETE | `/staff/{id}` | `staff:manage` | **missing — blocking (staff)** |
+| 9 | PATCH | `/menu-items/{id}/availability` | `menu:availability` | optional |
+| 10 | GET/PUT | `/restaurants/{slug}/settings/theme` | `settings:manage` | future |
 
 Everything else the restaurant-admin flow needs (menu CRUD, categories, language settings, restaurant CRUD) already exists in Swagger and is wired.

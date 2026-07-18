@@ -22,11 +22,16 @@ export interface StaffMember {
   status: StaffStatus;
 }
 
-/** Fields to invite a new staff member (id/status assigned server-side). */
+/**
+ * Fields to CREATE a new staff user (id/status assigned server-side). The admin
+ * sets an initial password — the member is a real, immediately-active login, not
+ * an emailed invitation.
+ */
 export interface StaffDraft {
   email: string;
   name: string;
   role: StaffRole;
+  password: string;
 }
 
 /** Partial update for an existing staff member (e.g. change their role). */

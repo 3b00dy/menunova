@@ -10,7 +10,7 @@ export { STAFF_ROLES } from "@/features/staff/domain/staff.entity";
 
 export { listStaff } from "@/features/staff/application/list-staff";
 export {
-  inviteStaff,
+  createStaff,
   updateStaff,
   removeStaff,
 } from "@/features/staff/application/staff-actions";

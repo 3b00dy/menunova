@@ -2,6 +2,7 @@ import { cookies } from "next/headers";
 import type { AuthUser, Role, Session } from "@/features/auth/domain/session.entity";
 import { getServerSession } from "@/shared/auth/getServerSession";
 import { env } from "@/shared/config/env";
+import { authRepository } from "@/features/auth/infrastructure/auth.repository";
 
 /**
  * Cookie that selects which demo role the mock session assumes. Set by the
@@ -45,16 +46,19 @@ function demoSession(role: "super_admin" | "owner" | "staff"): Session {
 /**
  * Resolve the full authenticated session (user + role).
  *
- * Live mode: verify the session token against the backend (TODO — returns null
- * until `AuthHttpRepository.verify` exists). Mock mode: hand back a demo session
- * for the role selected by the `mn_role` cookie (default: restaurant admin), so
- * the dashboard is fully browsable across roles before real auth is wired.
+ * Resolution order:
+ *  1. A real `mn_session` cookie that {@link authRepository} can verify wins —
+ *     this is a genuinely logged-in user (works in both mock and live mode).
+ *  2. Otherwise, in mock mode, fall back to a demo session for the role selected
+ *     by the `mn_role` cookie (default: restaurant admin), so the dashboard and
+ *     dev role switcher stay browsable without logging in.
+ *  3. Otherwise (live, no valid token): unauthenticated.
  */
 export async function getSession(): Promise<Session | null> {
   const raw = await getServerSession();
   if (raw) {
-    // TODO (live): verify `raw.token` against the backend and return the user
-    // (with role + restaurantId claims). See docs/backend-endpoints-missing.md.
+    const session = await authRepository.verify(raw.token);
+    if (session) return session;
   }
   if (env.dataMode === "mock") {
     const store = await cookies();

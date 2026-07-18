@@ -1,33 +1,59 @@
 import type { Locale } from "@/shared/i18n/config";
 import { getDictionary } from "@/shared/i18n/getDictionary";
 import { getMenu, computeMenuStats } from "@/features/menu";
-import { getRestaurantSettings, getRestaurantBySlug, type Restaurant } from "@/features/restaurant";
+import {
+  getRestaurantSettings,
+  getRestaurantBySlug,
+  listRestaurants,
+  computePlatformStats,
+  type Restaurant,
+} from "@/features/restaurant";
 import { DashboardOverview } from "@/app/[locale]/(dashboard)/dashboard/_components/DashboardOverview";
+import { SuperAdminOverview } from "@/app/[locale]/(dashboard)/dashboard/_components/SuperAdminOverview";
 import { getDashboardAccess } from "@/app/[locale]/(dashboard)/_lib/access";
 
-const RESTAURANT_SLUG = "demo"; // TODO: derive from the authenticated user's restaurant
-
-/** Dashboard overview — insights about the restaurant admin's account. */
+/** Dashboard overview — platform insights for the super admin, or account
+ * insights for a restaurant admin/staff. */
 export default async function DashboardHome({
   params,
 }: {
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = (await params) as { locale: Locale };
+  const access = await getDashboardAccess();
   const t = await getDictionary(locale);
 
-  const [menu, settings, restaurant, access] = await Promise.all([
-    getMenu(RESTAURANT_SLUG),
-    getRestaurantSettings(RESTAURANT_SLUG),
-    getRestaurantBySlug(RESTAURANT_SLUG),
-    getDashboardAccess(),
+  // Super admin manages no single restaurant — show the platform overview.
+  if (access.caps.restaurants && !access.restaurantId) {
+    const restaurants = await listRestaurants();
+    const platform = computePlatformStats(restaurants);
+    const menus = await Promise.all(restaurants.map((r) => getMenu(r.slug)));
+    const menuItems = menus.reduce((n, m) => n + (m?.items.length ?? 0), 0);
+    const menuCategories = menus.reduce((n, m) => n + (m?.categories.length ?? 0), 0);
+    return (
+      <SuperAdminOverview
+        stats={platform}
+        menuItems={menuItems}
+        menuCategories={menuCategories}
+        dict={t.dashboard}
+        locale={locale}
+      />
+    );
+  }
+
+  const slug = access.restaurantId ?? "demo";
+
+  const [menu, settings, restaurant] = await Promise.all([
+    getMenu(slug),
+    getRestaurantSettings(slug),
+    getRestaurantBySlug(slug),
   ]);
 
   const stats = computeMenuStats(menu, settings.supportedLanguages);
 
   // Fallback if the restaurant record is unavailable (backend down / empty).
   const account: Restaurant =
-    restaurant ?? { id: RESTAURANT_SLUG, slug: RESTAURANT_SLUG, name: RESTAURANT_SLUG, plan: "free", status: "active" };
+    restaurant ?? { id: slug, slug, name: slug, plan: "free", status: "active" };
 
   return (
     <DashboardOverview

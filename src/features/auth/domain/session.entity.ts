@@ -5,6 +5,8 @@ export type Role = "super_admin" | "owner" | "staff" | "customer";
 export interface AuthUser {
   id: string;
   email: string;
+  /** Display name (collected at registration); optional for legacy/demo users. */
+  name?: string;
   role: Role;
   /** Restaurant the user belongs to (owners/staff); absent for super_admin/customers. */
   restaurantId?: string;

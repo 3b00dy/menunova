@@ -18,7 +18,7 @@ const STAFF: Record<string, StaffMember[]> = {
   demo: [
     { id: "s_owner", email: "owner@pizzapalace.test", name: "Layla Hassan", role: "owner", status: "active" },
     { id: "s_sara", email: "sara@pizzapalace.test", name: "Sara Karim", role: "staff", status: "active" },
-    { id: "s_omar", email: "omar@pizzapalace.test", name: "Omar Ali", role: "staff", status: "invited" },
+    { id: "s_omar", email: "omar@pizzapalace.test", name: "Omar Ali", role: "staff", status: "active" },
   ],
 };
 
@@ -34,18 +34,21 @@ export class InMemoryStaffRepository implements StaffRepository {
     return teamOf(restaurantId).map(clone);
   }
 
-  async invite(restaurantId: string, draft: StaffDraft): Promise<StaffMember> {
+  async create(restaurantId: string, draft: StaffDraft): Promise<StaffMember> {
     const team = teamOf(restaurantId);
     const email = draft.email.trim().toLowerCase();
     if (team.some((m) => m.email.toLowerCase() === email)) {
       throw new Error(`A staff member with email "${draft.email}" already exists.`);
     }
+    // Created accounts are active immediately — the admin sets the password, so
+    // there is no pending-invitation state. (The login itself is created in the
+    // application layer via auth `createUser`.)
     const member: StaffMember = {
       id: nextId(),
       email: draft.email.trim(),
       name: draft.name.trim(),
       role: draft.role,
-      status: "invited",
+      status: "active",
     };
     team.push(member);
     return clone(member);

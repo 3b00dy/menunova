@@ -6,8 +6,6 @@ import {
 } from "@/app/[locale]/(dashboard)/_components/DashboardNav";
 import { getDashboardAccess } from "@/app/[locale]/(dashboard)/_lib/access";
 
-const RESTAURANT_SLUG = "demo"; // TODO: derive from the authenticated user's restaurant
-
 /**
  * Authenticated owner/staff shell (sidebar + content).
  *
@@ -26,11 +24,10 @@ export default async function DashboardLayout({
 }) {
   // Narrow for parity with other routes; direction/labels come via i18n context.
   void ((await params) as { locale: Locale });
-  // Role drives the nav; restaurant's supported languages drive the switcher.
-  const [{ caps, role, showRoleSwitcher }, settings] = await Promise.all([
-    getDashboardAccess(),
-    getRestaurantSettings(RESTAURANT_SLUG),
-  ]);
+  // Role drives the nav; the user's restaurant supplies the switcher languages.
+  const { caps, role, restaurantId, showRoleSwitcher } = await getDashboardAccess();
+  // Super admin has no single restaurant — fall back to the demo tenant's langs.
+  const settings = await getRestaurantSettings(restaurantId ?? "demo");
 
   return (
     <div className="flex flex-1">

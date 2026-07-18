@@ -7,6 +7,10 @@ export type {
   RestaurantPatch,
 } from "@/features/restaurant/domain/restaurant.entity";
 export { RESTAURANT_PLANS, RESTAURANT_STATUSES, statusTone } from "@/features/restaurant/domain/restaurant.entity";
+
+// Platform insights (super admin)
+export type { PlatformStats, PlanCount, StatusCount } from "@/features/restaurant/domain/restaurant.stats";
+export { computePlatformStats } from "@/features/restaurant/domain/restaurant.stats";
 export { getRestaurantBySlug } from "@/features/restaurant/application/get-restaurant-by-slug";
 export { listRestaurants } from "@/features/restaurant/application/list-restaurants";
 export {
@@ -14,6 +18,8 @@ export {
   updateRestaurant,
   deleteRestaurant,
 } from "@/features/restaurant/application/restaurant-actions";
+export { provisionRestaurant } from "@/features/restaurant/application/provision-restaurant";
+export { provisionRestaurantLanguages } from "@/features/restaurant/application/provision-settings";
 export { RestaurantsManager } from "@/features/restaurant/ui/RestaurantsManager";
 
 // Settings (languages)

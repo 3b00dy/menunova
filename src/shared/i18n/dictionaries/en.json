@@ -3,12 +3,118 @@
     "appName": "MenuNova",
     "getStarted": "Get started",
     "signIn": "Sign in",
-    "loading": "Loading…"
+    "loading": "Loading…",
+    "back": "Back",
+    "continue": "Continue"
   },
   "marketing": {
     "heroTitle": "Beautiful digital menus for every restaurant",
     "heroSubtitle": "Create, translate, and share your menu in minutes.",
     "seePricing": "See pricing"
+  },
+  "auth": {
+    "signIn": "Sign in",
+    "createAccount": "Create your account",
+    "registerSubtitle": "Set up your restaurant and start building your menu.",
+    "yourName": "Your name",
+    "yourNamePlaceholder": "e.g. Layla Hassan",
+    "restaurantName": "Restaurant name",
+    "restaurantNamePlaceholder": "e.g. Tony's Pizza",
+    "email": "Email",
+    "password": "Password",
+    "signInCta": "Sign in",
+    "registerCta": "Create my restaurant",
+    "haveAccount": "Already have an account?",
+    "noAccount": "New to MenuNova?",
+    "signInLink": "Sign in",
+    "registerLink": "Create an account",
+    "logout": "Log out",
+    "errors": {
+      "invalidCredentials": "Wrong email or password.",
+      "emailTaken": "That email is already registered.",
+      "required": "Please fill in all fields.",
+      "registerFailed": "Could not create your account. Please try again."
+    }
+  },
+  "onboarding": {
+    "header": { "haveAccount": "Already have an account?", "signIn": "Sign in" },
+    "steps": { "account": "Account", "plan": "Plan", "restaurant": "Restaurant", "theme": "Theme", "payment": "Payment" },
+    "account": {
+      "title": "Create your account",
+      "subtitle": "You'll be the admin of your restaurant.",
+      "fullName": "Your name",
+      "fullNamePlaceholder": "e.g. Layla Hassan",
+      "email": "Email",
+      "emailPlaceholder": "you@example.com",
+      "password": "Password",
+      "passwordHint": "At least 8 characters.",
+      "confirmPassword": "Confirm password",
+      "passwordMismatch": "Passwords don't match.",
+      "terms": "By continuing you agree to the Terms and Privacy Policy."
+    },
+    "plan": {
+      "title": "Choose your plan",
+      "subtitle": "Start free — upgrade anytime.",
+      "recommended": "Popular",
+      "perMonth": "/mo",
+      "free": "Free",
+      "items": {
+        "free": { "tagline": "For getting started", "features": ["1 restaurant menu", "QR code menu", "Up to 2 languages"] },
+        "pro": { "tagline": "For growing restaurants", "features": ["Unlimited menu items", "Theme customization", "Multi-language + RTL", "Real-time availability"] },
+        "enterprise": { "tagline": "For multi-location brands", "features": ["Everything in Pro", "Priority support", "Custom branding", "Advanced insights"] }
+      }
+    },
+    "restaurant": {
+      "title": "Set up your restaurant",
+      "subtitle": "This is what your customers will see.",
+      "name": "Restaurant name",
+      "namePlaceholder": "e.g. Tony's Pizza",
+      "slug": "Menu link",
+      "slugHint": "Your public menu address. Letters, numbers, and dashes.",
+      "logo": "Logo URL",
+      "logoHint": "Optional. Paste a link to your logo image.",
+      "languages": "Menu languages",
+      "languagesHint": "Choose the languages your menu is offered in.",
+      "defaultLanguage": "Default language"
+    },
+    "theme": {
+      "title": "Pick your brand color",
+      "subtitle": "Set the accent color for your public menu. You can fine-tune everything later in the Theme Builder.",
+      "brandColor": "Brand color",
+      "customColor": "Custom color"
+    },
+    "payment": {
+      "title": "Confirm & create",
+      "subtitle": "Payment is mocked in this demo — no card is charged.",
+      "sectionTitle": "Payment details",
+      "cardholder": "Cardholder name",
+      "cardholderPlaceholder": "Name on card",
+      "cardNumber": "Card number",
+      "expiry": "Expiry",
+      "cvc": "CVC",
+      "demoNote": "Demo checkout — use any card number.",
+      "summary": "Summary",
+      "summarySub": "Review before creating your restaurant.",
+      "planLabel": "Plan",
+      "restaurantLabel": "Restaurant",
+      "menuUrl": "Menu link",
+      "languageLabel": "Default language",
+      "themeLabel": "Brand color",
+      "dueToday": "Due today",
+      "free": "Free",
+      "pay": "Create my restaurant",
+      "processing": "Creating…"
+    },
+    "success": {
+      "title": "You're all set!",
+      "subtitle": "Taking you to your dashboard…"
+    },
+    "errors": {
+      "slug_taken": "That menu link is already taken. Please choose another.",
+      "email_taken": "That email is already registered.",
+      "required": "Please complete all required fields.",
+      "generic": "Something went wrong. Please try again."
+    }
   },
   "dashboard": {
     "title": "Dashboard",
@@ -98,6 +204,25 @@
       "noRestaurants": "No restaurants yet",
       "noRestaurantsHint": "Create a restaurant first, then manage its menu here."
     },
+    "platform": {
+      "title": "Platform overview",
+      "subtitle": "How every restaurant on MenuNova is doing.",
+      "kpis": {
+        "restaurants": "Restaurants",
+        "active": "Active",
+        "trial": "On trial",
+        "suspended": "Suspended",
+        "menuItems": "Menu items",
+        "categories": "Categories"
+      },
+      "sections": {
+        "byPlan": "Restaurants by plan",
+        "byStatus": "Restaurants by status",
+        "recent": "Recently added"
+      },
+      "actions": { "manageRestaurants": "Manage restaurants", "viewAll": "View all" },
+      "recent": { "empty": "No restaurants yet.", "view": "View menu" }
+    },
     "roles": {
       "super_admin": "Super Admin",
       "owner": "Restaurant Admin",
@@ -108,25 +233,27 @@
     },
     "staffManager": {
       "title": "Staff",
-      "subtitle": "Invite your team and set what each member can do.",
-      "add": "Invite staff",
-      "newMember": "Invite staff member",
+      "subtitle": "Create accounts for your team and set what each member can do.",
+      "add": "Add staff user",
+      "newMember": "New staff user",
       "memberName": "Full name",
       "namePlaceholder": "e.g. Sara Karim",
       "email": "Email",
       "emailPlaceholder": "name@restaurant.com",
+      "password": "Password",
+      "passwordHint": "At least 8 characters.",
       "role": "Role",
       "roles": { "owner": "Restaurant Admin", "staff": "Staff" },
       "statuses": { "active": "Active", "invited": "Invited" },
       "roleHint": "Staff can only mark items in or out of stock. Admins manage the whole restaurant.",
-      "create": "Send invite",
+      "create": "Create user",
       "cancel": "Cancel",
       "remove": "Remove",
       "removeTitle": "Remove staff member",
       "removeConfirm": "Remove \"{name}\" from the team?",
       "removeNote": "They will lose access to this restaurant's dashboard. This cannot be undone.",
       "empty": "No staff yet.",
-      "emptyHint": "Invite your first team member to help manage the menu."
+      "emptyHint": "Add your first team member to help manage the menu."
     }
   },
   "menu": {

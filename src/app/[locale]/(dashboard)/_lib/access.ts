@@ -24,6 +24,8 @@ export interface DashboardCapabilities {
 export interface DashboardAccess {
   /** Current role (e.g. "owner"), or null when unauthenticated. */
   role: string | null;
+  /** The restaurant this user is scoped to (its slug), or null (super admin). */
+  restaurantId: string | null;
   /** Show the dev role switcher (demo/mock mode only). */
   showRoleSwitcher: boolean;
   caps: DashboardCapabilities;
@@ -36,6 +38,7 @@ export async function getDashboardAccess(): Promise<DashboardAccess> {
   const has = (perm: Parameters<typeof can>[1]) => !!user && can(user, perm);
   return {
     role: user?.role ?? null,
+    restaurantId: user?.restaurantId ?? null,
     showRoleSwitcher: env.dataMode === "mock",
     caps: {
       menu: has("menu:availability"),

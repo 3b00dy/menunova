@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { requirePermission } from "@/features/auth";
+import { createUser, requirePermission } from "@/features/auth";
 import type {
   StaffDraft,
   StaffMember,
@@ -20,13 +20,26 @@ async function revalidate(locale: string): Promise<void> {
   revalidatePath(`/${locale}/dashboard/staff`);
 }
 
-export async function inviteStaff(input: {
+/**
+ * Create a staff USER: the admin sets an initial password and the account is
+ * active immediately (no invitation). We create the staff record AND a matching
+ * login so the person can actually sign in (`createUser` is a no-op in live mode,
+ * where the backend's staff endpoint owns login creation).
+ */
+export async function createStaff(input: {
   locale: string;
   restaurantId: string;
   draft: StaffDraft;
 }): Promise<StaffMember> {
   const { token } = await requirePermission("staff:manage");
-  const created = await staffRepository.invite(input.restaurantId, input.draft, token);
+  const created = await staffRepository.create(input.restaurantId, input.draft, token);
+  await createUser({
+    email: input.draft.email,
+    password: input.draft.password,
+    name: input.draft.name,
+    role: input.draft.role,
+    restaurantId: input.restaurantId,
+  });
   await revalidate(input.locale);
   return created;
 }

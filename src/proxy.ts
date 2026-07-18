@@ -1,8 +1,11 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { locales, defaultLocale, isLocale } from "@/shared/i18n/config";
-// TEMP: dashboard auth gating disabled below — restore this import with it.
-// import { SESSION_COOKIE } from "@/shared/auth/getServerSession";
+import { env } from "@/shared/config/env";
+
+// Session cookie name (kept in sync with `@/shared/auth/getServerSession`; not
+// imported here to avoid pulling `next/headers` into the proxy runtime).
+const SESSION_COOKIE = "mn_session";
 
 /**
  * Proxy (Next.js 16's renamed middleware; runs on the Node.js runtime).
@@ -44,16 +47,20 @@ export function proxy(request: NextRequest): NextResponse {
     return response;
   }
 
-  // 2. Dashboard auth gating (coarse; defense-in-depth is in the app layer).
-  // TEMPORARILY DISABLED for local exploration — restore before shipping.
-  // const segments = pathname.split("/");
-  // const isDashboard = segments[2] === "dashboard";
-  // if (isDashboard && !request.cookies.get(SESSION_COOKIE)) {
-  //   const locale = segments[1] || defaultLocale;
-  //   const url = request.nextUrl.clone();
-  //   url.pathname = `/${locale}/login`;
-  //   return NextResponse.redirect(url);
-  // }
+  // 2. Dashboard auth gating (coarse; the real boundary is app-layer
+  //    `requirePermission`). Enforced in LIVE mode only — in mock mode the demo
+  //    fallback session (and dev role switcher) keep `/dashboard` browsable
+  //    without a login, which the seeded demo relies on.
+  if (env.dataMode === "live") {
+    const segments = pathname.split("/");
+    const isDashboard = segments[2] === "dashboard";
+    if (isDashboard && !request.cookies.get(SESSION_COOKIE)) {
+      const locale = segments[1] || defaultLocale;
+      const url = request.nextUrl.clone();
+      url.pathname = `/${locale}/login`;
+      return NextResponse.redirect(url);
+    }
+  }
 
   return NextResponse.next();
 }

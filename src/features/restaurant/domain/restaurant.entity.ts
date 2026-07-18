@@ -28,6 +28,9 @@ export interface RestaurantDraft {
   ownerEmail?: string;
   plan: RestaurantPlan;
   status: RestaurantStatus;
+  /** Optional branding captured at onboarding (both are real API fields). */
+  logoUrl?: string;
+  brandColor?: string;
 }
 
 /** Partial update for an existing restaurant. */

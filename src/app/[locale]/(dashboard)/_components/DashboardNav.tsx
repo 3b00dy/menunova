@@ -13,6 +13,7 @@ import { useI18n } from "@/shared/i18n/I18nProvider";
 import { routes } from "@/shared/config/routes";
 import { Sidebar, MobileNav, BrandLogo, LanguagePicker, type NavItem } from "@/shared/ui";
 import { RoleSwitcher } from "@/features/auth/ui/RoleSwitcher";
+import { LogoutButton } from "@/features/auth/ui/LogoutButton";
 
 /**
  * Which dashboard capabilities the current user has. A serializable projection
@@ -92,6 +93,7 @@ export function DashboardSidebar({
         <div className="flex flex-col gap-3">
           <LanguagePicker supportedCodes={supportedLanguages} className="w-full justify-between" />
           {showRoleSwitcher && <RoleSwitcher role={role} />}
+          <LogoutButton />
         </div>
       }
     />

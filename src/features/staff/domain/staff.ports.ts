@@ -7,7 +7,7 @@ import type { StaffDraft, StaffMember, StaffPatch } from "@/features/staff/domai
  */
 export interface StaffRepository {
   list(restaurantId: string): Promise<StaffMember[]>;
-  invite(restaurantId: string, draft: StaffDraft, token: string): Promise<StaffMember>;
+  create(restaurantId: string, draft: StaffDraft, token: string): Promise<StaffMember>;
   update(id: string, patch: StaffPatch, token: string): Promise<StaffMember>;
   remove(id: string, token: string): Promise<void>;
 }

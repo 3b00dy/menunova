@@ -1,17 +1,7 @@
-import { Card, Button, Input, Field } from "@/shared/ui";
+import { LoginForm } from "@/features/auth/ui/LoginForm";
 
-/** SKELETON: login form goes here (wire `@/features/auth` login action). */
+/** Login — "/{locale}/login". The form is a Client Component (locale + labels
+ * come from the i18n context; it calls the `login` Server Action). */
 export default function LoginPage() {
-  return (
-    <Card className="p-6 flex flex-col gap-4">
-      <h1 className="text-xl font-semibold text-[rgb(var(--color-text))]">Sign in</h1>
-      <Field label="Email">
-        <Input type="email" placeholder="you@example.com" />
-      </Field>
-      <Field label="Password">
-        <Input type="password" placeholder="••••••••" />
-      </Field>
-      <Button block>Sign in</Button>
-    </Card>
-  );
+  return <LoginForm />;
 }
