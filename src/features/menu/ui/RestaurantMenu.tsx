@@ -65,6 +65,7 @@ export function RestaurantMenu({
     : data.categories[0]?.id ?? "";
 
   const screenStyle: MenuVars = {
+    padding: 0,
     "--pv-bg": c.background,
     "--pv-primary": c.primary,
     "--pv-secondary": c.secondary,
