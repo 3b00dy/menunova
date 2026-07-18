@@ -1,14 +1,20 @@
 import { httpClient } from "@/shared/http/httpClient";
 import { API_ENDPOINTS } from "@/shared/constants/api";
 import type { AuthRepository, RegisterInput } from "@/features/auth/domain/auth.ports";
-import type { Role, Session } from "@/features/auth/domain/session.entity";
+import type { AuthUser, Role, Session } from "@/features/auth/domain/session.entity";
+import {
+  ownerUserFrom,
+  signSession,
+  verifySessionToken,
+} from "@/features/auth/infrastructure/session-token";
 
 /**
- * HTTP implementation of {@link AuthRepository}.
+ * HTTP implementation of {@link AuthRepository} against the deployed backend.
  *
- * NOTE: the `/auth/*` endpoints it calls are NOT YET IMPLEMENTED by the backend
- * — this documents the expected contract so flipping `dataMode=live` works the
- * moment they ship. See docs/backend-endpoints-missing.md.
+ * `login`/`verify`/`logout` hit the backend's live `/auth/*` endpoints.
+ * `register` is served by the Next BFF (`POST /api/auth/register`) because the
+ * backend has no signup endpoint yet — so its tokens are BFF-signed and
+ * `verify` validates them locally before falling back to the backend.
  */
 
 interface UserDto {
@@ -24,39 +30,45 @@ interface AuthDto {
   user: UserDto;
 }
 
-function toSession(dto: AuthDto): Session {
+function userFromDto(dto: UserDto): AuthUser {
   return {
-    token: dto.token,
-    user: {
-      id: dto.user.id,
-      email: dto.user.email,
-      name: dto.user.name ?? undefined,
-      role: dto.user.role,
-      restaurantId: dto.user.restaurant_id ?? undefined,
-    },
+    id: dto.id,
+    email: dto.email,
+    name: dto.name ?? undefined,
+    role: dto.role,
+    restaurantId: dto.restaurant_id ?? undefined,
   };
 }
 
 export class HttpAuthRepository implements AuthRepository {
   async login(email: string, password: string): Promise<Session> {
+    // `/auth/login` returns { token, user }.
     const dto = await httpClient.post<AuthDto>(API_ENDPOINTS.auth.login, { email, password });
-    return toSession(dto);
+    return { token: dto.token, user: userFromDto(dto.user) };
   }
 
   async register(input: RegisterInput): Promise<Session> {
-    const dto = await httpClient.post<AuthDto>(API_ENDPOINTS.auth.register, {
+    // No backend signup endpoint yet — mint a BFF-signed session locally (the
+    // same thing `POST /api/auth/register` does). The restaurant is provisioned
+    // separately by the caller via `POST /restaurants`.
+    const user = ownerUserFrom({
       email: input.email,
-      password: input.password,
       name: input.name,
-      restaurant_id: input.restaurantId,
+      restaurantId: input.restaurantId,
     });
-    return toSession(dto);
+    return { token: signSession(user, Date.now()), user };
   }
 
   async verify(token: string): Promise<Session | null> {
+    // BFF-issued (registration) tokens verify locally — no backend round-trip.
+    const local = verifySessionToken(token, Date.now());
+    if (local) return { token, user: local };
+
+    // Otherwise it's a backend login token: `/auth/me` returns a bare user DTO
+    // (no wrapper, no token) — pair it back with the caller's token.
     try {
-      const dto = await httpClient.get<AuthDto>(API_ENDPOINTS.auth.me, { token });
-      return toSession(dto);
+      const dto = await httpClient.get<UserDto>(API_ENDPOINTS.auth.me, { token });
+      return { token, user: userFromDto(dto) };
     } catch {
       return null;
     }

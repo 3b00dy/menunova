@@ -1,4 +1,5 @@
 import { cookies } from "next/headers";
+import { SESSION_COOKIE, isDemoToken } from "@/shared/auth/session-cookie";
 
 /**
  * Thin, shared session-cookie accessor used by layouts, the proxy, and the auth
@@ -7,7 +8,18 @@ import { cookies } from "next/headers";
  * dependency on a feature).
  */
 
-export const SESSION_COOKIE = "mn_session";
+// Re-export the client-safe constants/helpers so existing importers of this
+// module keep working (the pure versions live in `session-cookie.ts`).
+export { SESSION_COOKIE, isDemoToken } from "@/shared/auth/session-cookie";
+
+/**
+ * True when the current request belongs to a demo session — the signal that the
+ * app should serve seeded mock data instead of calling the live API.
+ */
+export async function isDemoRequest(): Promise<boolean> {
+  const session = await getServerSession();
+  return !!session && isDemoToken(session.token);
+}
 
 /** One year — the token itself carries expiry; this is just the cookie lifetime. */
 const MAX_AGE_SECONDS = 60 * 60 * 24 * 365;

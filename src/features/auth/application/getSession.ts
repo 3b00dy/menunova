@@ -2,6 +2,7 @@ import { cookies } from "next/headers";
 import type { AuthUser, Role, Session } from "@/features/auth/domain/session.entity";
 import { getServerSession } from "@/shared/auth/getServerSession";
 import { env } from "@/shared/config/env";
+import { demoSessionForToken } from "@/features/auth/domain/demo-accounts";
 import { authRepository } from "@/features/auth/infrastructure/auth.repository";
 
 /**
@@ -57,6 +58,10 @@ function demoSession(role: "super_admin" | "owner" | "staff"): Session {
 export async function getSession(): Promise<Session | null> {
   const raw = await getServerSession();
   if (raw) {
+    // Demo sessions (public "try it" login) resolve locally in any data mode —
+    // no backend call. See `demo-accounts.ts` and the login action.
+    const demo = demoSessionForToken(raw.token);
+    if (demo) return demo;
     const session = await authRepository.verify(raw.token);
     if (session) return session;
   }

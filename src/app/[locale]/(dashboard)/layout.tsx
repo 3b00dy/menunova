@@ -1,4 +1,6 @@
+import { Sparkles } from "lucide-react";
 import type { Locale } from "@/shared/i18n/config";
+import { getDictionary } from "@/shared/i18n/getDictionary";
 import { getRestaurantSettings } from "@/features/restaurant";
 import {
   DashboardSidebar,
@@ -23,11 +25,12 @@ export default async function DashboardLayout({
   params: Promise<{ locale: string }>;
 }) {
   // Narrow for parity with other routes; direction/labels come via i18n context.
-  void ((await params) as { locale: Locale });
+  const { locale } = (await params) as { locale: Locale };
   // Role drives the nav; the user's restaurant supplies the switcher languages.
-  const { caps, role, restaurantId, showRoleSwitcher } = await getDashboardAccess();
+  const { caps, role, restaurantId, showRoleSwitcher, isDemo } = await getDashboardAccess();
   // Super admin has no single restaurant — fall back to the demo tenant's langs.
   const settings = await getRestaurantSettings(restaurantId ?? "demo");
+  const dict = await getDictionary(locale);
 
   return (
     <div className="flex flex-1">
@@ -39,6 +42,12 @@ export default async function DashboardLayout({
       />
       <div className="flex flex-1 flex-col min-w-0">
         <DashboardMobileNav caps={caps} />
+        {isDemo && (
+          <div className="flex items-center gap-2 border-b border-[rgb(var(--color-border))] bg-[rgb(var(--color-surface))] px-8 py-2.5 text-sm font-medium text-[rgb(var(--color-primary))]">
+            <Sparkles className="h-4 w-4 shrink-0" />
+            <span>{dict.dashboard.demoBanner}</span>
+          </div>
+        )}
         <main className="flex-1 p-8">{children}</main>
       </div>
     </div>

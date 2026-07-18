@@ -1,7 +1,7 @@
 "use server";
 
 import { redirect } from "next/navigation";
-import { clearServerSession, getServerSession } from "@/shared/auth/getServerSession";
+import { clearServerSession, getServerSession, isDemoToken } from "@/shared/auth/getServerSession";
 import { routes } from "@/shared/config/routes";
 import type { Locale } from "@/shared/i18n/config";
 import { authRepository } from "@/features/auth/infrastructure/auth.repository";
@@ -14,7 +14,8 @@ import { authRepository } from "@/features/auth/infrastructure/auth.repository";
  */
 export async function logout(locale: Locale): Promise<void> {
   const raw = await getServerSession();
-  if (raw) {
+  // Demo sessions have no backend token to revoke — just clear the cookie.
+  if (raw && !isDemoToken(raw.token)) {
     try {
       await authRepository.logout(raw.token);
     } catch {

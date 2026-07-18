@@ -29,6 +29,11 @@
     "signInLink": "Sign in",
     "registerLink": "Create an account",
     "logout": "Log out",
+    "demoTitle": "Explore the demo",
+    "demoSubtitle": "No signup needed — sign in as a demo user to tour the dashboard.",
+    "demoAdmin": "Restaurant admin",
+    "demoStaff": "Staff member",
+    "demoHint": "Demo data is a sandbox and isn't saved to the live backend.",
     "errors": {
       "invalidCredentials": "Wrong email or password.",
       "emailTaken": "That email is already registered.",
@@ -118,6 +123,7 @@
   },
   "dashboard": {
     "title": "Dashboard",
+    "demoBanner": "You're exploring the demo. Changes are sandboxed and won't be saved.",
     "overview": {
       "subtitle": "Here's how your menu and account are doing.",
       "kpis": {

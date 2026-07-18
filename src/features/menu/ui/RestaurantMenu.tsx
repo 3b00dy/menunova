@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, type CSSProperties, type ReactNode } from "react";
+import { useState, type CSSProperties, type ReactNode } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { Clock, Flame, Phone, MapPin, Globe, X, ArrowLeft, Sparkles } from "lucide-react";
 import {
@@ -52,18 +52,17 @@ export function RestaurantMenu({
   const { brandColors: c, typography, components, brandAssets } = theme;
   const buttonStyle = components.buttonStyle;
 
-  const [activeCategory, setActiveCategory] = useState<string>(
+  const [selectedCategory, setActiveCategory] = useState<string>(
     data.categories[0]?.id ?? "",
   );
   const [categoriesView, setCategoriesView] = useState<"grid" | "items">("grid");
   const [selectedItem, setSelectedItem] = useState<MenuViewItem | null>(null);
 
-  // Keep selection valid if the menu data changes.
-  useEffect(() => {
-    if (!data.categories.some((cat) => cat.id === activeCategory)) {
-      setActiveCategory(data.categories[0]?.id ?? "");
-    }
-  }, [data, activeCategory]);
+  // Derive the active category during render instead of syncing via an effect:
+  // if the current selection is no longer in the data, fall back to the first.
+  const activeCategory = data.categories.some((cat) => cat.id === selectedCategory)
+    ? selectedCategory
+    : data.categories[0]?.id ?? "";
 
   const screenStyle: MenuVars = {
     "--pv-bg": c.background,

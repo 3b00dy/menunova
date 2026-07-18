@@ -4,21 +4,17 @@ import {
   FolderTree,
   UtensilsCrossed,
   CircleCheck,
-  CircleSlash,
   Palette,
   Languages,
   ExternalLink,
   Building2,
   ArrowRight,
-  Coins,
-  Tag,
   Users,
 } from "lucide-react";
 import type { Locale } from "@/shared/i18n/config";
 import type { Dictionary } from "@/shared/i18n/getDictionary";
 import { localize } from "@/shared/i18n/localized";
 import { SUPPORTED_LANGUAGES } from "@/shared/i18n/languages";
-import { formatMoney } from "@/shared/utils/formatMoney";
 import { routes } from "@/shared/config/routes";
 import { Badge, Card, CardBody, CardHeader, PageHeader } from "@/shared/ui";
 import type { MenuStats } from "@/features/menu";
@@ -53,8 +49,6 @@ export function DashboardOverview({
   caps: DashboardCapabilities;
 }) {
   const o = dict.overview;
-  const money = (minor: number) =>
-    stats.price ? formatMoney({ amountMinor: minor, currency: stats.price.currency }, locale) : "—";
   const createdAt = restaurant.createdAt
     ? new Intl.DateTimeFormat(locale, { dateStyle: "medium" }).format(new Date(restaurant.createdAt))
     : null;

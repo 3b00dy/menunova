@@ -17,13 +17,17 @@ export const API_BASE_URL = env.apiUrl;
  */
 export const API_ENDPOINTS = {
   auth: {
-    /** POST — email/password → { token, user }. NOT YET IMPLEMENTED (see docs). */
+    /** POST — email/password → { token, user }. Live on the backend. */
     login: "/auth/login",
-    /** POST — create user (+ provision restaurant) → { token, user }. NOT YET IMPLEMENTED. */
-    register: "/auth/register",
-    /** GET — verify bearer token → current { token, user }. NOT YET IMPLEMENTED. */
+    /**
+     * POST — create owner account → { token, user }. The backend has no signup
+     * endpoint; this is served by the Next BFF at `POST /api/auth/register`
+     * (see src/app/api/auth/register/route.ts).
+     */
+    register: "/api/auth/register",
+    /** GET — verify bearer token → current user DTO (bare, no wrapper). Live. */
     me: "/auth/me",
-    /** POST — invalidate the current token. NOT YET IMPLEMENTED. */
+    /** POST — invalidate the current token. Live. */
     logout: "/auth/logout",
   },
   restaurants: {

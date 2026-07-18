@@ -1,7 +1,10 @@
 # Backend — Missing Endpoints for the Restaurant-Admin Flow
 
 **Audience:** backend developer (ASP.NET Core).
-**Context:** the frontend now has a complete role/permission model and a restaurant-admin flow (menu CRUD, staff management, availability toggling, settings). It runs today against in-memory mocks. This document lists the endpoints the backend must add so the frontend can flip from mock to **live** (`MENUNOVA_DATA_MODE=live`) with no further frontend changes.
+
+> **Status (updated):** `/auth/login`, `/auth/me`, `/auth/logout` are now **live** on the backend and wired in the frontend. `/auth/register` is **not** on the backend; the frontend serves it from a **BFF route** (`POST /api/auth/register`, see [`src/app/api/auth/register/route.ts`](../src/app/api/auth/register/route.ts)) that mints a signed owner session, so self-serve signup works in live mode today. The **staff** endpoints (§3) are still missing — that feature falls back to an empty state in live mode until they ship. See the updated checklist in §6.
+
+**Context:** the frontend now has a complete role/permission model and a restaurant-admin flow (menu CRUD, staff management, availability toggling, settings). This document lists the endpoints the backend must add so the frontend can drop its BFF/mock stand-ins.
 
 Base URL: `https://menunovaapi.onrender.com` (host root, no `/api` prefix).
 All request/response bodies are JSON with **snake_case** keys (matches the existing endpoints — see [backend-data-model.md](./backend-data-model.md)).
@@ -158,10 +161,10 @@ If you implement it, the frontend's `setItemAvailability` action ([`item-actions
 
 | # | Method | Path | Gated by | Status |
 |---|---|---|---|---|
-| 1 | POST | `/auth/login` | public | **missing — blocking** |
-| 2 | POST | `/auth/register` | public | **missing — blocking (self-serve signup)** |
-| 3 | GET | `/auth/me` | any authed | **missing — blocking** |
-| 4 | POST | `/auth/logout` | any authed | **missing** |
+| 1 | POST | `/auth/login` | public | ✅ live |
+| 2 | POST | `/auth/register` | public | served by frontend BFF (`/api/auth/register`); backend endpoint still welcome |
+| 3 | GET | `/auth/me` | any authed | ✅ live (returns a **bare** user DTO — no `{token,user}` wrapper) |
+| 4 | POST | `/auth/logout` | any authed | ✅ live |
 | 5 | GET | `/restaurants/{slug}/staff` | `staff:manage` | **missing — blocking (staff)** |
 | 6 | POST | `/restaurants/{slug}/staff` | `staff:manage` | **missing — creates staff + login (password)** |
 | 7 | PATCH | `/staff/{id}` | `staff:manage` | **missing — blocking (staff)** |

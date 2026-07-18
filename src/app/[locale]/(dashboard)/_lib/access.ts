@@ -1,4 +1,5 @@
 import { env } from "@/shared/config/env";
+import { isDemoToken } from "@/shared/auth/getServerSession";
 import { can, getSession } from "@/features/auth";
 
 /**
@@ -28,6 +29,8 @@ export interface DashboardAccess {
   restaurantId: string | null;
   /** Show the dev role switcher (demo/mock mode only). */
   showRoleSwitcher: boolean;
+  /** This is a public demo session (sandboxed data, no live backend). */
+  isDemo: boolean;
   caps: DashboardCapabilities;
 }
 
@@ -40,6 +43,7 @@ export async function getDashboardAccess(): Promise<DashboardAccess> {
     role: user?.role ?? null,
     restaurantId: user?.restaurantId ?? null,
     showRoleSwitcher: env.dataMode === "mock",
+    isDemo: !!session && isDemoToken(session.token),
     caps: {
       menu: has("menu:availability"),
       menuManage: has("menu:manage"),
