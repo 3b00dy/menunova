@@ -20,6 +20,8 @@ export const routes = {
   dashboardBilling: (locale: Locale) => `/${locale}/dashboard/billing`,
   /** Super-admin: manage all restaurants (tenants). */
   dashboardRestaurants: (locale: Locale) => `/${locale}/dashboard/restaurants`,
+  /** Super-admin: manage all user accounts. */
+  dashboardUsers: (locale: Locale) => `/${locale}/dashboard/users`,
 
   /** Public, per-tenant customer menu. */
   publicMenu: (locale: Locale, restaurantSlug: string) =>

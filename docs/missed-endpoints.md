@@ -48,6 +48,22 @@ The login page now supports two paths:
 
 No backend work required for the demo; it is intentionally a client-only sandbox.
 
+### Users (system-wide) — **still missing on the backend** (super-admin Users page)
+
+The super-admin **Users** page (`/dashboard/users`) manages every account on the
+platform. It works fully in the demo (seeded mock directory) and falls back to an
+empty list in live mode until these ship. Gated by `users:manage` (super_admin only).
+
+User DTO: `{ id, email, name, role, restaurant_id?, status, created_at?, last_active_at? }`
+(`role` ∈ `super_admin|owner|staff|customer`; `status` ∈ `active|invited|suspended`).
+
+| Method | Path | Purpose |
+|---|---|---|
+| `GET` | `/users` | List every user account |
+| `POST` | `/users` | Create a user (email, name, role, password, restaurant_id?) — also creates their login |
+| `PATCH` | `/users/{id}` | Update name / role / status / restaurant |
+| `DELETE` | `/users/{id}` | Remove (reject removing the last super_admin → `422`) |
+
 ### Staff management — **still missing on the backend** (blocking for live staff)
 
 Until these ship, live staff falls back to an empty team (the demo uses the mock

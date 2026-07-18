@@ -6,6 +6,7 @@ import {
   Palette,
   Store,
   Users,
+  UserCog,
   CreditCard,
   Building2,
 } from "lucide-react";
@@ -31,6 +32,8 @@ export interface DashboardCaps {
   staff: boolean;
   /** Platform-wide: all restaurants (super admin). */
   restaurants: boolean;
+  /** Platform-wide: all user accounts (super admin). */
+  users: boolean;
 }
 
 /**
@@ -49,6 +52,13 @@ function useNavItems(caps: DashboardCaps): NavItem[] {
       href: routes.dashboardRestaurants(locale),
       label: t.dashboard.allRestaurants,
       icon: Building2,
+    });
+  }
+  if (caps.users) {
+    items.push({
+      href: routes.dashboardUsers(locale),
+      label: t.dashboard.allUsers,
+      icon: UserCog,
     });
   }
   if (caps.menu) {

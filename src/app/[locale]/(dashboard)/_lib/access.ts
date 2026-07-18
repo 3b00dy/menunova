@@ -20,6 +20,8 @@ export interface DashboardCapabilities {
   staff: boolean;
   /** Platform-wide: all restaurants. (`restaurants:manage`) */
   restaurants: boolean;
+  /** Platform-wide: all user accounts. (`users:manage`) */
+  users: boolean;
 }
 
 export interface DashboardAccess {
@@ -51,6 +53,7 @@ export async function getDashboardAccess(): Promise<DashboardAccess> {
       settings: has("settings:manage"),
       staff: has("staff:manage"),
       restaurants: has("restaurants:manage"),
+      users: has("users:manage"),
     },
   };
 }

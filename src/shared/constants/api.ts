@@ -68,8 +68,20 @@ export const API_ENDPOINTS = {
   staff: {
     /**
      * PATCH (update role) · DELETE (remove) — a staff member by id.
-     * NOT YET IMPLEMENTED by the backend — see docs/backend-endpoints-missing.md.
+     * NOT YET IMPLEMENTED by the backend — see docs/missed-endpoints.md.
      */
     byId: (id: string) => `/staff/${encodeURIComponent(id)}`,
+  },
+  users: {
+    /**
+     * GET (list all) · POST (create) — platform-wide user accounts (super-admin).
+     * NOT YET IMPLEMENTED by the backend — see docs/missed-endpoints.md.
+     */
+    list: "/users",
+    /**
+     * GET · PATCH · DELETE — a user by id.
+     * NOT YET IMPLEMENTED by the backend — see docs/missed-endpoints.md.
+     */
+    byId: (id: string) => `/users/${encodeURIComponent(id)}`,
   },
 } as const;

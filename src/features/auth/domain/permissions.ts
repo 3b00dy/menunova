@@ -24,7 +24,9 @@ export type Permission =
   /** Invite / update / remove staff members of the restaurant. */
   | "staff:manage"
   /** Platform-wide: see and manage every restaurant (tenant). */
-  | "restaurants:manage";
+  | "restaurants:manage"
+  /** Platform-wide: see and manage every user account. */
+  | "users:manage";
 
 /**
  * The permissions granted to each role. This is the single source of truth for
@@ -40,6 +42,7 @@ export const ROLE_PERMISSIONS: Record<Role, readonly Permission[]> = {
     "settings:manage",
     "staff:manage",
     "restaurants:manage",
+    "users:manage",
   ],
   owner: ["menu:manage", "menu:availability", "theme:manage", "settings:manage", "staff:manage"],
   staff: ["menu:availability"],
