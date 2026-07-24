@@ -162,6 +162,24 @@ The super-admin Users flow now works end-to-end. It took a backend change **and*
   restaurant on the frontend, but there is **no live persistence** — it falls back to
   `DEFAULT_THEME_CONFIG`. Expected per docs; confirmed.
 
+### Finding D — `DELETE /restaurants/by-id/{id}` 500s when the restaurant has categories/items (backend)
+- **Severity:** Medium (super-admin can't delete a restaurant that has any menu data).
+- **Repro:** create a restaurant, add ≥1 category/item, `DELETE /restaurants/by-id/{id}` → **500**
+  (restaurant remains). Delete all items + categories first, then the same call → **204**. So the
+  delete does **not cascade** at the API layer, even though the schema declares
+  `on delete cascade` (`docs/backend-data-model.md`).
+- **User-facing effect:** the super-admin "delete restaurant" action fails for any non-empty
+  restaurant.
+- **Action (backend):** make restaurant deletion cascade (or delete children in a transaction).
+  Frontend workaround (optional): delete the menu tree before the restaurant.
+
+### Category / menu-item create — `restaurant_slug` in body (frontend aligned)
+- The `POST /restaurants/{slug}/categories` and `.../menu-items` bodies document a `restaurant_slug`
+  field. Verified the backend **derives the restaurant from the path** — both calls succeed with or
+  without it (200). Aligned the frontend to send `restaurant_slug` explicitly anyway (matches the
+  Swagger command shape, future-proof). Files: `menu.http.repository.ts` (`createCategory`,
+  `createItem`). No behavior change today.
+
 ---
 
 ## What was NOT covered (and why)

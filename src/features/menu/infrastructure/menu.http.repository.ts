@@ -38,7 +38,7 @@ export class HttpMenuRepository implements MenuRepository {
   async createItem(slug: string, draft: MenuItemDraft, token: string): Promise<MenuItem> {
     const dto = await httpClient.post<ItemDto>(
       API_ENDPOINTS.restaurants.menuItems(slug),
-      itemBody(draft),
+      { restaurant_slug: slug, ...itemBody(draft) },
       { token },
     );
     return toItem(dto);
@@ -60,7 +60,7 @@ export class HttpMenuRepository implements MenuRepository {
   async createCategory(slug: string, draft: CategoryDraft, token: string): Promise<Category> {
     const dto = await httpClient.post<CategoryDto>(
       API_ENDPOINTS.restaurants.categories(slug),
-      { name: draft.name, position: draft.position },
+      { restaurant_slug: slug, name: draft.name, position: draft.position },
       { token },
     );
     return toCategory(dto);

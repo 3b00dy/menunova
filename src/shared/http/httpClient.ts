@@ -27,6 +27,13 @@ async function request<T>(path: string, options: RequestOptions = {}): Promise<T
 
   const url = path.startsWith("http") ? path : `${env.apiUrl}${path}`;
 
+  // Dev-only: surface the outgoing backend request in the server terminal.
+  // These fetches run on the server, so they never appear in the browser
+  // Network tab — this is where you watch them during `pnpm dev`.
+  if (process.env.NODE_ENV !== "production") {
+    console.log(`[httpClient] ${(rest.method ?? "GET").toUpperCase()} ${url}`);
+  }
+
   const response = await fetch(url, {
     ...rest,
     next,
