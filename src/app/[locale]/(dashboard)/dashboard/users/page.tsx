@@ -29,7 +29,7 @@ export default async function UsersPage({
       <PageHeader title={t.dashboard.usersAdmin.title} description={t.dashboard.usersAdmin.subtitle} />
       <UsersManager
         users={users}
-        restaurants={restaurants.map((r) => ({ slug: r.slug, name: r.name }))}
+        restaurants={restaurants.map((r) => ({ id: r.id, slug: r.slug, name: r.name }))}
         locale={locale}
       />
     </section>

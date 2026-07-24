@@ -19,14 +19,14 @@ import type { UsersRepository } from "@/features/users/domain/users.ports";
 
 const USERS: User[] = [
   { id: "u_super", email: "admin@menunova.app", name: "Platform Admin", role: "super_admin", status: "active", createdAt: "2025-08-01", lastActiveAt: "2026-07-18T09:12:00Z" },
-  { id: "s_owner", email: "owner@pizzapalace.test", name: "Layla Hassan", role: "owner", restaurantId: "demo", status: "active", createdAt: "2025-11-02", lastActiveAt: "2026-07-17T20:40:00Z" },
-  { id: "s_sara", email: "sara@pizzapalace.test", name: "Sara Karim", role: "staff", restaurantId: "demo", status: "active", createdAt: "2025-11-05", lastActiveAt: "2026-07-16T14:05:00Z" },
-  { id: "s_omar", email: "omar@pizzapalace.test", name: "Omar Ali", role: "staff", restaurantId: "demo", status: "invited", createdAt: "2026-01-20" },
-  { id: "u_sakura", email: "hello@sakura.test", name: "Kenji Sato", role: "owner", restaurantId: "sakura-sushi", status: "active", createdAt: "2025-09-18", lastActiveAt: "2026-07-15T11:30:00Z" },
-  { id: "u_smash", email: "team@smashhouse.test", name: "Marco Diaz", role: "owner", restaurantId: "smash-house", status: "active", createdAt: "2026-06-27" },
-  { id: "u_amwaj", email: "manager@amwaj.test", name: "Nour Fahmy", role: "owner", restaurantId: "amwaj-cafe", status: "suspended", createdAt: "2025-12-11" },
-  { id: "u_najd", email: "info@najdgrill.test", name: "Faisal Otaibi", role: "owner", restaurantId: "najd-grill", status: "active", createdAt: "2026-02-04", lastActiveAt: "2026-07-10T08:00:00Z" },
-  { id: "u_najd_staff", email: "huda@najdgrill.test", name: "Huda Zahrani", role: "staff", restaurantId: "najd-grill", status: "active", createdAt: "2026-03-01" },
+  { id: "s_owner", email: "owner@pizzapalace.test", name: "Layla Hassan", role: "owner", restaurantId: "r_demo", status: "active", createdAt: "2025-11-02", lastActiveAt: "2026-07-17T20:40:00Z" },
+  { id: "s_sara", email: "sara@pizzapalace.test", name: "Sara Karim", role: "staff", restaurantId: "r_demo", status: "active", createdAt: "2025-11-05", lastActiveAt: "2026-07-16T14:05:00Z" },
+  { id: "s_omar", email: "omar@pizzapalace.test", name: "Omar Ali", role: "staff", restaurantId: "r_demo", status: "invited", createdAt: "2026-01-20" },
+  { id: "u_sakura", email: "hello@sakura.test", name: "Kenji Sato", role: "owner", restaurantId: "r_sushi", status: "active", createdAt: "2025-09-18", lastActiveAt: "2026-07-15T11:30:00Z" },
+  { id: "u_smash", email: "team@smashhouse.test", name: "Marco Diaz", role: "owner", restaurantId: "r_burger", status: "active", createdAt: "2026-06-27" },
+  { id: "u_amwaj", email: "manager@amwaj.test", name: "Nour Fahmy", role: "owner", restaurantId: "r_cafe", status: "suspended", createdAt: "2025-12-11" },
+  { id: "u_najd", email: "info@najdgrill.test", name: "Faisal Otaibi", role: "owner", restaurantId: "r_grill", status: "active", createdAt: "2026-02-04", lastActiveAt: "2026-07-10T08:00:00Z" },
+  { id: "u_najd_staff", email: "huda@najdgrill.test", name: "Huda Zahrani", role: "staff", restaurantId: "r_grill", status: "active", createdAt: "2026-03-01" },
   { id: "u_cust1", email: "diner1@example.com", name: "Ahmad Yusuf", role: "customer", status: "active", createdAt: "2026-05-14", lastActiveAt: "2026-07-18T19:22:00Z" },
   { id: "u_cust2", email: "diner2@example.com", name: "Mona Saleh", role: "customer", status: "active", createdAt: "2026-06-30" },
 ];

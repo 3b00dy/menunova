@@ -21,7 +21,7 @@ export interface User {
   email: string;
   name: string;
   role: UserRole;
-  /** Restaurant the user belongs to (its slug); absent for super_admin/customer. */
+  /** Restaurant the user belongs to (its id); absent for super_admin/customer. */
   restaurantId?: string;
   status: UserStatus;
   /** ISO date the account was created (fixed string for stable SSR). */

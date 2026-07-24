@@ -7,7 +7,7 @@ import type { User, UserDraft, UserPatch } from "@/features/users/domain/user.en
  * — only super admins hold it.
  */
 export interface UsersRepository {
-  list(): Promise<User[]>;
+  list(token: string): Promise<User[]>;
   create(draft: UserDraft, token: string): Promise<User>;
   update(id: string, patch: UserPatch, token: string): Promise<User>;
   remove(id: string, token: string): Promise<void>;

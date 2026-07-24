@@ -55,8 +55,8 @@ function toBody(patch: UserPatch & Partial<UserDraft>): Record<string, unknown> 
 }
 
 export class HttpUsersRepository implements UsersRepository {
-  async list(): Promise<User[]> {
-    const dtos = await httpClient.get<UserDto[]>(API_ENDPOINTS.users.list);
+  async list(token: string): Promise<User[]> {
+    const dtos = await httpClient.get<UserDto[]>(API_ENDPOINTS.users.list, { token });
     return dtos.map(toUser);
   }
 

@@ -35,7 +35,7 @@ import {
   updateUserAccount,
 } from "@/features/users/application/user-actions";
 
-type RestaurantOption = { slug: string; name: string };
+type RestaurantOption = { id: string; slug: string; name: string };
 
 type Dialog =
   | { type: "create" }
@@ -72,8 +72,8 @@ export function UsersManager({
   const [roleFilter, setRoleFilter] = useState<UserRole | "all">("all");
   const [statusFilter, setStatusFilter] = useState<UserStatus | "all">("all");
 
-  const restaurantName = (slug?: string) =>
-    slug ? restaurants.find((r) => r.slug === slug)?.name ?? slug : null;
+  const restaurantName = (id?: string) =>
+    id ? restaurants.find((r) => r.id === id)?.name ?? id : null;
 
   const q = query.trim().toLowerCase();
   const filtered = useMemo(
@@ -82,10 +82,11 @@ export function UsersManager({
         if (roleFilter !== "all" && user.role !== roleFilter) return false;
         if (statusFilter !== "all" && user.status !== statusFilter) return false;
         if (q === "") return true;
-        const hay = [user.name, user.email, user.restaurantId ?? ""].join(" ").toLowerCase();
+        const rName = restaurants.find((r) => r.id === user.restaurantId)?.name ?? "";
+        const hay = [user.name, user.email, rName].join(" ").toLowerCase();
         return hay.includes(q);
       }),
-    [users, roleFilter, statusFilter, q],
+    [users, restaurants, roleFilter, statusFilter, q],
   );
 
   function run(action: () => Promise<unknown>) {
@@ -339,7 +340,7 @@ function UserForm({
   const [role, setRole] = useState<UserRole>(editing?.role ?? "owner");
   const [status, setStatus] = useState<UserStatus>(editing?.status ?? "active");
   const [restaurantId, setRestaurantId] = useState<string>(
-    editing?.restaurantId ?? restaurants[0]?.slug ?? "",
+    editing?.restaurantId ?? restaurants[0]?.id ?? "",
   );
 
   const needsRestaurant = roleNeedsRestaurant(role);
@@ -444,7 +445,7 @@ function UserForm({
                 {u.selectRestaurant}
               </option>
               {restaurants.map((r) => (
-                <option key={r.slug} value={r.slug}>
+                <option key={r.id} value={r.id}>
                   {r.name}
                 </option>
               ))}
