@@ -10,12 +10,12 @@ import type {
 import type { UsersRepository } from "@/features/users/domain/users.ports";
 
 /**
- * HTTP implementation of {@link UsersRepository}.
- *
- * NOTE: the `/users` endpoints it calls are NOT YET IMPLEMENTED by the backend —
- * this repo documents the expected contract (snake_case DTOs) so flipping to
- * live works the moment they ship. Until then the mock repo serves the demo.
- * See docs/missed-endpoints.md.
+ * HTTP implementation of {@link UsersRepository} against the live backend
+ * `/users` endpoints (`GET|POST /users`, `PATCH|DELETE /users/{id}`) — verified
+ * live. All calls carry the caller's bearer token (the endpoints enforce auth);
+ * `restaurant_id` is the restaurant's **uuid** (FK → restaurants.id), not its
+ * slug. Bodies are snake_case; partial `PATCH` is supported (only sent fields
+ * change). See docs/api-endpoints-reference.md.
  */
 
 interface UserDto {

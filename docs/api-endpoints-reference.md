@@ -8,7 +8,14 @@ Only the endpoints the frontend needs that are **not working** live (verified by
 a valid `super_admin` token). Everything else the app uses is live and passing — see
 [`qa-flow-test-results.md`](./qa-flow-test-results.md).
 
-Status legend: 🔒 present in Swagger but `403` · ❌ not implemented (`404`).
+Status legend: ❌ not implemented (`404`).
+
+> **Update (2026-07-24):** the `/users` endpoints (`GET|POST /users`, `PATCH|DELETE /users/{id}`)
+> are now **fully live** — GET 200, POST 201, PATCH 200, DELETE 204, partial PATCH supported. The
+> earlier `403` is gone. The frontend integration is wired and verified: `list()` forwards the
+> bearer token and `restaurant_id` is sent as the restaurant **uuid** (`format: uuid`, FK →
+> `restaurants.id`), not the slug. They are no longer "missed" and have been removed from the list
+> below.
 
 All bodies are JSON, **snake_case**. Localized fields (`name`, `description`) are
 `{ "en": "...", "ar": "..." }`. Money is integer minor units (`price_minor`) + ISO `currency`.
@@ -19,47 +26,41 @@ All bodies are JSON, **snake_case**. Localized fields (`name`, `description`) ar
 
 | # | Method | Path | Feature | Status |
 |---|---|---|---|---|
-| 1 | GET | `/users` | users (super-admin) | 🔒 403 |
-| 2 | POST | `/users` | users (super-admin) | 🔒 403 |
-| 3 | PATCH | `/users/{id}` | users (super-admin) | 🔒 403 |
-| 4 | DELETE | `/users/{id}` | users (super-admin) | 🔒 403 |
-| 5 | GET | `/restaurants/{slug}/staff` | staff | ❌ 404 |
-| 6 | POST | `/restaurants/{slug}/staff` | staff | ❌ 404 |
-| 7 | PATCH | `/staff/{id}` | staff | ❌ 404 |
-| 8 | DELETE | `/staff/{id}` | staff | ❌ 404 |
-| 9 | GET | `/restaurants/{slug}/settings/theme` | theme-builder | ❌ 404 |
-| 10 | PUT | `/restaurants/{slug}/settings/theme` | theme-builder | ❌ 404 |
-| 11 | PATCH | `/menu-items/{id}/availability` | staff (optional) | ❌ 404 |
-| 12 | POST | `/auth/register` | auth (optional) | ❌ 404 — BFF covers it |
+| 1 | GET | `/restaurants/{slug}/staff` | staff | ❌ 404 |
+| 2 | POST | `/restaurants/{slug}/staff` | staff | ❌ 404 |
+| 3 | PATCH | `/staff/{id}` | staff | ❌ 404 |
+| 4 | DELETE | `/staff/{id}` | staff | ❌ 404 |
+| 5 | GET | `/restaurants/{slug}/settings/theme` | theme-builder | ❌ 404 |
+| 6 | PUT | `/restaurants/{slug}/settings/theme` | theme-builder | ❌ 404 |
+| 7 | PATCH | `/menu-items/{id}/availability` | staff (optional) | ❌ 404 |
+| 8 | POST | `/auth/register` | auth (optional) | ❌ 404 — BFF covers it |
 
-**Totals:** 4 forbidden 🔒 · 8 missing ❌.
+**Totals:** 8 missing ❌. (`/users` CRUD moved to ✅ live — see the update note above.)
 
 ---
 
-## 🔒 Present in Swagger but forbidden (403) — needs a backend authorization fix
+## ✅ `/users` — now live and integrated (was 🔒 403)
 
-These four **exist in Swagger** with full command/DTO schemas, but return **`403 Forbidden`** to a
-valid `super_admin` Bearer token — the same token that works on `/restaurants`, `/categories`, etc.
-Frontend effect: `listUsers` swallows the error → the super-admin Users page shows an **empty
-list**; create/update/delete surface an `ApiError`.
+Verified 2026-07-24 with a super_admin token: `GET /users` → 200, `POST /users` → 201,
+`PATCH /users/{id}` → 200 (partial patch supported), `DELETE /users/{id}` → 204. All require the
+bearer JWT (global `Bearer` security). Frontend integration is wired and verified in
+`src/features/users/` (`list()` forwards the token; `restaurant_id` sent as uuid).
 
 | Method | Path | Purpose | Body |
 |---|---|---|---|
 | GET | `/users` | List every user account | — |
 | POST | `/users` | Create user (+ login) | `CreateUserCommand` |
-| PATCH | `/users/{id}` | Update name/role/status/restaurant | `UpdateUserCommand` |
+| PATCH | `/users/{id}` | Update name/role/status/restaurant (id in path) | `UpdateUserCommand` |
 | DELETE | `/users/{id}` | Remove user | — |
 
 ```json
 // CreateUserCommand
 { "email":"…","name":"…","password":"•••","role":"staff",
-  "status":"active","restaurant_id":"…" }
-// UpdateUserCommand: { "id","name","role","status","restaurant_id" }
+  "status":"active","restaurant_id":"<uuid, FK→restaurants.id>" }
+// UpdateUserCommand: { "name","role","status","restaurant_id" }  (id from path)
 // UserDto: { "id","email","name","role","status","restaurant_id","created_at","last_active_at" }
 // role ∈ super_admin|owner|staff|customer   status ∈ active|invited|suspended
 ```
-**Backend action:** authorize `super_admin` on the `/users` controller (grant the policy/claim the
-endpoints require), then re-verify. Suggested rule: reject deleting the last `super_admin` → `422`.
 
 ---
 
@@ -97,6 +98,6 @@ Frontend Theme Builder has a Save button wired; without these it falls back to
 ---
 
 ## Change vs. `docs/missed-endpoints.md`
-That doc lists `/users` as *missing*. **Update:** `/users` is now **published in Swagger** but
-**returns 403** for super_admin — so it moved from "missing" to "present-but-unauthorized". Staff
-and theme endpoints remain missing as documented.
+That doc lists `/users` as *missing*. **Update (2026-07-24):** `/users` CRUD is now **fully live and
+integrated** on the frontend (see the ✅ section above) — no longer missed. Staff and theme
+endpoints remain missing as documented.

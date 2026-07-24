@@ -21,12 +21,13 @@ Legend: ✅ pass · ⚠️ works but with a caveat · ❌ fail / not implemented
 | Menu (with changes) | ✅ Pass | Category + item create/update/delete, changes persist |
 | Staff | ❌ Fail | All staff endpoints return **404 — not implemented** on the backend |
 | Super admin — restaurants | ✅ Pass | List + delete work with the super_admin token |
-| Super admin — **Users** | ❌ Fail | `/users` endpoints exist in Swagger but return **403** for a valid super_admin token |
+| Super admin — **Users** | ✅ Pass (as of 2026-07-24) | `/users` CRUD now fully live; frontend integration fixed + verified |
 
-**Headline finding:** the `/users` endpoints (previously documented as "missing") are now
-**published in Swagger but return `403 Forbidden`** even to a valid `super_admin` JWT — so the
-super-admin Users management page is still non-functional in live mode. See
-[Finding A](#finding-a--users-endpoints-return-403-for-super_admin).
+**Update (2026-07-24):** the `/users` endpoints are now **fully live** (GET 200 · POST 201 · PATCH
+200 · DELETE 204, partial PATCH supported) — the earlier `403` is gone. Two **frontend** bugs found
+during testing were fixed so the integration is correct: (1) `listUsers` sent no bearer token →
+would 401; (2) the create/edit form sent the restaurant **slug** where the backend wants the
+restaurant **uuid**. See [Finding A](#finding-a--users-flow-resolved).
 
 ---
 
@@ -116,39 +117,40 @@ endpoints.**
 | List all | `GET /restaurants` | ✅ **200**, returned all tenants (`napoli`, `test-diner-probe`, `ptest`) |
 | Delete | `DELETE /restaurants/by-id/{id}` | ✅ **204** (used to clean up the probe restaurant) |
 
-### Users management — ❌ (see Finding A)
+### Users management — ✅ (as of 2026-07-24; see Finding A)
 | Step | Request | Result |
 |---|---|---|
-| List users | `GET /users` | ❌ **403** (with valid super_admin Bearer) |
-| Create user | `POST /users` | ❌ **403** |
-| Update / delete user | `PATCH` / `DELETE /users/{id}` | Not reachable (blocked by the 403 above) |
+| List users | `GET /users` (Bearer) | ✅ **200** |
+| Create user | `POST /users` (`restaurant_id` = uuid) | ✅ **201** |
+| Update user | `PATCH /users/{id}` (id in path; partial body) | ✅ **200** |
+| Delete user | `DELETE /users/{id}` | ✅ **204** |
 
 ---
 
 ## Findings
 
-### Finding A — `/users` endpoints return 403 for super_admin (backend) + list sent no token (frontend, FIXED)
-- **Severity:** High (blocks the entire super-admin Users page in live mode).
-- **What changed:** the repo docs (`docs/missed-endpoints.md`) list `/users` as *missing on the
-  backend*. As of this run they **exist in Swagger** (`GET/POST /users`, `PATCH/DELETE /users/{id}`)
-  but return **`403 Forbidden`** — even though the decoded JWT clearly carries `role: super_admin`
-  and the same token is accepted by `/restaurants`, `/categories`, etc.
-- **Two stacked problems** (confirmed by probing the auth model —
-  `GET /users` no token → **401**, with super_admin token → **403**, `GET /restaurants` no token → 200):
-  1. **Frontend bug (FIXED):** `HttpUsersRepository.list()` was called **without a bearer token**
-     (`UsersRepository.list()` had no token param), while every mutation forwarded one. So the live
-     list request was **unauthenticated → 401** — it could never work even once the backend grants
-     access. Fixed by threading the token through `list(token)` and resolving it in `listUsers` via
-     `requirePermission("users:manage")`, mirroring the create/update/delete actions.
-     Files: `users.ports.ts`, `users.http.repository.ts`, `application/list-users.ts`.
-  2. **Backend bug (open):** even **with** a valid super_admin token, `/users` returns **403** —
-     an authorization policy on the `/users` controller the super_admin principal doesn't satisfy
-     (missing claim/policy mapping), or a stubbed blanket deny.
-- **User-facing effect:** `listUsers` swallows the error, so the page shows an **empty list**
-  (looks like "no users" rather than an error); create/update/delete show a failure toast.
-- **Remaining action:** backend to grant super_admin access to `/users` (and confirm the `403`
-  isn't a stub). The frontend now authenticates correctly, so the flow unblocks the moment the
-  backend policy is fixed.
+### Finding A — Users flow (RESOLVED)
+The super-admin Users flow now works end-to-end. It took a backend change **and** two frontend fixes:
+
+- **Backend (fixed upstream):** `/users` previously returned `403` to a valid super_admin token; as
+  of 2026-07-24 all four operations succeed (GET 200 · POST 201 · PATCH 200 · DELETE 204, partial
+  PATCH supported). All require the bearer JWT (global `Bearer` security — `GET /users` with no
+  token → 401).
+- **Frontend fix 1 — missing token (FIXED):** `HttpUsersRepository.list()` was called **without a
+  bearer token** (`UsersRepository.list()` had no token param), while every mutation forwarded one.
+  The live list request would have been **unauthenticated → 401**. Fixed by threading the token
+  through `list(token)` and resolving it in `listUsers` via `requirePermission("users:manage")`,
+  mirroring the create/update/delete actions.
+  Files: `users.ports.ts`, `users.http.repository.ts`, `application/list-users.ts`.
+- **Frontend fix 2 — wrong `restaurant_id` (FIXED):** the create/edit form sent the restaurant
+  **slug** as `restaurant_id`, but Swagger types it `format: uuid` (FK → `restaurants.id`). The
+  picker only carried `{slug,name}`. Fixed by carrying the real restaurant **id** end-to-end (form
+  option value, default, name lookup) and updating the mock seed to id-based `restaurantId`.
+  Files: `users/page.tsx`, `ui/UsersManager.tsx`, `infrastructure/users.mock.repository.ts`,
+  `domain/user.entity.ts`.
+- **Verification:** the exact frontend request shapes were probed live — list forwards the token
+  (200), create sends a uuid `restaurant_id` (201), partial PATCH with id-in-path only (200),
+  delete (204). Typecheck + lint clean.
 
 ### Finding B — Staff endpoints not implemented (404)
 - **Severity:** High for the staff/team feature; expected per existing docs.

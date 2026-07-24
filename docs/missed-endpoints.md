@@ -48,21 +48,24 @@ The login page now supports two paths:
 
 No backend work required for the demo; it is intentionally a client-only sandbox.
 
-### Users (system-wide) — **still missing on the backend** (super-admin Users page)
+### Users (system-wide) — ✅ **LIVE + integrated** as of 2026-07-24 (super-admin Users page)
 
 The super-admin **Users** page (`/dashboard/users`) manages every account on the
-platform. It works fully in the demo (seeded mock directory) and falls back to an
-empty list in live mode until these ship. Gated by `users:manage` (super_admin only).
+platform. Gated by `users:manage` (super_admin only). **These endpoints are now live**
+(GET 200 · POST 201 · PATCH 200, partial patch supported · DELETE 204) and wired to the
+HTTP repository in live mode; the demo still uses the seeded mock directory.
 
 User DTO: `{ id, email, name, role, restaurant_id?, status, created_at?, last_active_at? }`
 (`role` ∈ `super_admin|owner|staff|customer`; `status` ∈ `active|invited|suspended`).
+**`restaurant_id` is the restaurant uuid** (`format: uuid`, FK → `restaurants.id`) — not the slug.
+All calls require the bearer JWT.
 
-| Method | Path | Purpose |
-|---|---|---|
-| `GET` | `/users` | List every user account |
-| `POST` | `/users` | Create a user (email, name, role, password, restaurant_id?) — also creates their login |
-| `PATCH` | `/users/{id}` | Update name / role / status / restaurant |
-| `DELETE` | `/users/{id}` | Remove (reject removing the last super_admin → `422`) |
+| Method | Path | Purpose | Status |
+|---|---|---|---|
+| `GET` | `/users` | List every user account | ✅ live |
+| `POST` | `/users` | Create a user (email, name, role, password, restaurant_id?) — also creates their login | ✅ live |
+| `PATCH` | `/users/{id}` | Update name / role / status / restaurant (id in path) | ✅ live |
+| `DELETE` | `/users/{id}` | Remove | ✅ live |
 
 ### Staff management — **still missing on the backend** (blocking for live staff)
 
