@@ -4,12 +4,11 @@ import type { ThemeConfig } from "@/shared/theme/tenant-config";
 import type { RestaurantThemeRepository } from "@/features/restaurant/domain/restaurant-theme.ports";
 
 /**
- * HTTP implementation of {@link RestaurantThemeRepository}.
- *
- * NOTE: the theme settings endpoint (`GET|PUT /restaurants/{slug}/settings/theme`)
- * is NOT YET IMPLEMENTED by the backend — this documents the expected contract
- * so flipping to live works the moment it ships. Until then the mock serves the
- * demo. See docs/missed-endpoints.md. The theme JSON is stored/returned as-is.
+ * HTTP implementation of {@link RestaurantThemeRepository} against the live
+ * backend theme endpoint (`GET|PUT /restaurants/{slug}/settings/theme`) —
+ * verified live. It is a passthrough JSON store: `PUT` persists the `ThemeConfig`
+ * as-is and `GET` returns it as-is (204/empty → `null` → callers fall back to the
+ * default theme). See docs/api-endpoints-reference.md.
  */
 export const restaurantThemeHttpRepository: RestaurantThemeRepository = {
   async get(slug: string) {

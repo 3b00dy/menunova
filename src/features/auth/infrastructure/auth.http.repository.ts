@@ -30,13 +30,40 @@ interface AuthDto {
   user: UserDto;
 }
 
-function userFromDto(dto: UserDto): AuthUser {
+/**
+ * Bridge the backend's restaurant **uuid** (`/auth/login` + `/auth/me` return
+ * `restaurant_id` as a uuid) to the public **slug** the dashboard pages are keyed
+ * by (menu / theme / language / staff all call `/restaurants/{slug}/...`). We
+ * resolve the slug via `GET /restaurants/by-id/{id}` (cached — a restaurant's
+ * slug rarely changes) and store the slug in `session.user.restaurantId`.
+ *
+ * Falls back to the original value on any failure, which also transparently
+ * handles BFF-signed / demo owners whose `restaurantId` is *already* a slug
+ * (the by-id lookup 404s → we keep the slug).
+ */
+async function resolveRestaurantSlug(
+  idOrSlug: string | undefined,
+  token: string,
+): Promise<string | undefined> {
+  if (!idOrSlug) return undefined;
+  try {
+    const restaurant = await httpClient.get<{ slug?: string } | null>(
+      API_ENDPOINTS.restaurants.byId(idOrSlug),
+      { token, next: { revalidate: 300, tags: [`restaurant:by-id:${idOrSlug}`] } },
+    );
+    return restaurant?.slug ?? idOrSlug;
+  } catch {
+    return idOrSlug;
+  }
+}
+
+async function userFromDto(dto: UserDto, token: string): Promise<AuthUser> {
   return {
     id: dto.id,
     email: dto.email,
     name: dto.name ?? undefined,
     role: dto.role,
-    restaurantId: dto.restaurant_id ?? undefined,
+    restaurantId: await resolveRestaurantSlug(dto.restaurant_id ?? undefined, token),
   };
 }
 
@@ -44,7 +71,7 @@ export class HttpAuthRepository implements AuthRepository {
   async login(email: string, password: string): Promise<Session> {
     // `/auth/login` returns { token, user }.
     const dto = await httpClient.post<AuthDto>(API_ENDPOINTS.auth.login, { email, password });
-    return { token: dto.token, user: userFromDto(dto.user) };
+    return { token: dto.token, user: await userFromDto(dto.user, dto.token) };
   }
 
   async register(input: RegisterInput): Promise<Session> {
@@ -68,7 +95,7 @@ export class HttpAuthRepository implements AuthRepository {
     // (no wrapper, no token) — pair it back with the caller's token.
     try {
       const dto = await httpClient.get<UserDto>(API_ENDPOINTS.auth.me, { token });
-      return { token, user: userFromDto(dto) };
+      return { token, user: await userFromDto(dto, token) };
     } catch {
       return null;
     }

@@ -10,15 +10,11 @@ import type {
 import type { StaffRepository } from "@/features/staff/domain/staff.ports";
 
 /**
- * HTTP implementation of {@link StaffRepository}.
- *
- * NOTE: the staff endpoints it calls are NOT YET IMPLEMENTED by the backend —
- * this repo documents the expected contract so that flipping `dataMode=live`
- * works the moment the backend ships them. Until then the mock repo is used.
- * See docs/backend-endpoints-missing.md.
- *
- * `restaurantId` is treated as the tenant slug in the URL (adjust to match the
- * backend's addressing when the endpoints land).
+ * HTTP implementation of {@link StaffRepository} against the live backend staff
+ * endpoints (`GET|POST /restaurants/{slug}/staff`, `PATCH|DELETE /staff/{id}`) —
+ * verified live. `restaurantId` is the tenant **slug** in the URL; `POST` needs
+ * no `slug` in the body (the backend derives it from the path). `PATCH` accepts
+ * a partial body (only sent fields change). See docs/api-endpoints-reference.md.
  */
 
 interface StaffDto {

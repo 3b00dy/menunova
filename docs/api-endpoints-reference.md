@@ -10,12 +10,17 @@ a valid `super_admin` token). Everything else the app uses is live and passing �
 
 Status legend: ❌ not implemented (`404`).
 
-> **Update (2026-07-24):** the `/users` endpoints (`GET|POST /users`, `PATCH|DELETE /users/{id}`)
-> are now **fully live** — GET 200, POST 201, PATCH 200, DELETE 204, partial PATCH supported. The
-> earlier `403` is gone. The frontend integration is wired and verified: `list()` forwards the
-> bearer token and `restaurant_id` is sent as the restaurant **uuid** (`format: uuid`, FK →
-> `restaurants.id`), not the slug. They are no longer "missed" and have been removed from the list
-> below.
+> **Update (2026-07-24 #2):** re-probing shows the backend surface has grown again — **staff
+> (`GET|POST /restaurants/{slug}/staff`, `PATCH|DELETE /staff/{id}`) and theme
+> (`GET|PUT /restaurants/{slug}/settings/theme`) are now LIVE** (previously 404). The **only**
+> genuinely missing endpoints left are the optional `PATCH /menu-items/{id}/availability` (unused
+> by the frontend) and a public `POST /auth/register`. For the full frontend⇄backend comparison,
+> the owner slug/uuid blocker, and the registration/plan gaps, see
+> **[`frontend-backend-integration-audit.md`](./frontend-backend-integration-audit.md)**.
+>
+> **Update (2026-07-24 #1):** the `/users` endpoints are now **fully live** — GET 200, POST 201,
+> PATCH 200, DELETE 204, partial PATCH supported. The frontend integration is wired and verified:
+> `list()` forwards the bearer token and `restaurant_id` is sent as the restaurant **uuid**.
 
 All bodies are JSON, **snake_case**. Localized fields (`name`, `description`) are
 `{ "en": "...", "ar": "..." }`. Money is integer minor units (`price_minor`) + ISO `currency`.
@@ -26,16 +31,12 @@ All bodies are JSON, **snake_case**. Localized fields (`name`, `description`) ar
 
 | # | Method | Path | Feature | Status |
 |---|---|---|---|---|
-| 1 | GET | `/restaurants/{slug}/staff` | staff | ❌ 404 |
-| 2 | POST | `/restaurants/{slug}/staff` | staff | ❌ 404 |
-| 3 | PATCH | `/staff/{id}` | staff | ❌ 404 |
-| 4 | DELETE | `/staff/{id}` | staff | ❌ 404 |
-| 5 | GET | `/restaurants/{slug}/settings/theme` | theme-builder | ❌ 404 |
-| 6 | PUT | `/restaurants/{slug}/settings/theme` | theme-builder | ❌ 404 |
-| 7 | PATCH | `/menu-items/{id}/availability` | staff (optional) | ❌ 404 |
-| 8 | POST | `/auth/register` | auth (optional) | ❌ 404 — BFF covers it |
+| 1 | PATCH | `/menu-items/{id}/availability` | staff (optional) | ❌ 404 — unused by frontend |
+| 2 | POST | `/auth/register` | auth | ❌ 404 — needed for real self-serve signup (see audit Finding 2) |
 
-**Totals:** 8 missing ❌. (`/users` CRUD moved to ✅ live — see the update note above.)
+**Totals:** 2 missing ❌. Staff (4), theme (2), and `/users` CRUD (4) all moved to ✅ **live** as of
+2026-07-24 — see the update notes above and the audit doc. Note: even though staff/theme are live,
+owner access to them is blocked by the slug/uuid session bug (audit Finding 1).
 
 ---
 
@@ -66,7 +67,11 @@ bearer JWT (global `Bearer` security). Frontend integration is wired and verifie
 
 ## ❌ Missing on the backend (404) — not yet implemented
 
-### Staff management (blocking the staff/team feature)
+> ⚠️ **Superseded (2026-07-24):** the **Staff management** and **Theme persistence** blocks below
+> are now **LIVE** — kept here only as the contract reference. Verified: staff GET 200 / POST 201 /
+> PATCH 200 / DELETE 204; theme GET 200|204 / PUT 200. See the audit doc.
+
+### Staff management — ✅ now live (contract reference)
 Scoped to `{slug}`; gated by `staff:manage` (owner, super_admin) on the frontend.
 
 | Method | Path | Purpose |

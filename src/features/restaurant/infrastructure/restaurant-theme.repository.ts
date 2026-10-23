@@ -6,8 +6,8 @@ import { restaurantThemeHttpRepository } from "@/features/restaurant/infrastruct
 /**
  * Composition edge: route the theme repository per request (see
  * `requestRoutedRepository`). Demo sessions and mock mode use the seeded
- * in-memory themes; live sessions talk to the backend theme endpoint (still
- * missing — see docs/missed-endpoints.md, so live falls back to the default).
+ * in-memory themes; live sessions talk to the backend theme endpoint
+ * (`GET|PUT /restaurants/{slug}/settings/theme`) — live and verified.
  */
 export const restaurantThemeRepository: RestaurantThemeRepository = requestRoutedRepository(
   restaurantThemeMockRepository,
