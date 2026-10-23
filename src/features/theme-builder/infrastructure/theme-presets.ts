@@ -1,3 +1,4 @@
+import { SUPPORTED_LANGUAGES } from "@/shared/i18n/languages";
 import type { ThemeConfig } from "@/features/theme-builder/domain/theme-config";
 
 /**
@@ -79,16 +80,17 @@ export const FONT_OPTIONS: string[] = [
   "Cormorant Garamond",
 ];
 
-/** Language toggles offered by the builder (native display names). */
+/**
+ * Language toggles offered by the builder (native display names) — derived from
+ * the shared content-language catalog so every picker offers the same set.
+ */
 export interface LanguageOption {
   code: string;
   name: string;
 }
-export const LANGUAGE_OPTIONS: LanguageOption[] = [
-  { code: "en", name: "English" },
-  { code: "ar", name: "العربية" },
-
-];
+export const LANGUAGE_OPTIONS: LanguageOption[] = Object.values(SUPPORTED_LANGUAGES).map(
+  ({ code, name }) => ({ code, name }),
+);
 
 /** Dummy menu the live preview renders so layout changes feel realistic. */
 export interface PreviewMenuItem {

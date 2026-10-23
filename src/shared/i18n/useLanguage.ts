@@ -2,6 +2,7 @@
 
 import { usePathname, useRouter } from "next/navigation";
 import { defaultLocale, isLocale } from "@/shared/i18n/config";
+import { uiLocaleFor } from "@/shared/i18n/languages";
 
 const LOCALE_COOKIE = "mn_locale";
 
@@ -18,13 +19,25 @@ export function useLanguage() {
   const current = segments[1];
   const lang = isLocale(current) ? current : defaultLocale;
 
-  const setLang = (next: string) => {
+  /** Navigate to the same path under UI locale `ui`, with an optional query. */
+  const navigate = (ui: string, query = "") => {
     const parts = pathname.split("/");
-    if (isLocale(parts[1])) parts[1] = next;
-    else parts.splice(1, 0, next);
-    document.cookie = `${LOCALE_COOKIE}=${next};path=/`;
-    router.push(parts.join("/") || `/${next}`);
+    if (isLocale(parts[1])) parts[1] = ui;
+    else parts.splice(1, 0, ui);
+    document.cookie = `${LOCALE_COOKIE}=${ui};path=/`;
+    router.push((parts.join("/") || `/${ui}`) + query);
   };
 
-  return { lang, setLang };
+  /** Switch the app UI locale (route segment). */
+  const setLang = (next: string) => navigate(next);
+
+  /**
+   * Switch the public menu's **content** language. UI locales (`en`, `ar`) map
+   * straight to the route; other content languages (e.g. `ckb`) keep the route on
+   * their companion UI locale and select the content via `?lang=`.
+   */
+  const setMenuLanguage = (code: string) =>
+    navigate(uiLocaleFor(code), isLocale(code) ? "" : `?lang=${encodeURIComponent(code)}`);
+
+  return { lang, setLang, setMenuLanguage };
 }

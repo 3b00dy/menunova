@@ -1,7 +1,8 @@
 import { notFound } from "next/navigation";
 import type { Locale } from "@/shared/i18n/config";
 import { getDictionary } from "@/shared/i18n/getDictionary";
-import { getRestaurantTheme } from "@/features/restaurant";
+import { resolveMenuLanguage } from "@/shared/i18n/languages";
+import { getRestaurantSettings, getRestaurantTheme } from "@/features/restaurant";
 import { getMenuView, PublicMenu, type MenuViewLabels } from "@/features/menu";
 
 /**
@@ -11,21 +12,35 @@ import { getMenuView, PublicMenu, type MenuViewLabels } from "@/features/menu";
  * render `PublicMenu` — the same `RestaurantMenu` the Theme Builder previews,
  * plus a customer layout switcher. `params` is async (Next.js 16). `/r/demo`
  * keeps showing the rich sample; every other slug renders that tenant's data.
+ *
+ * Content language is separate from the UI locale: `?lang=` picks one of the
+ * restaurant's enabled languages (e.g. Sorani `ckb`, shown under the Arabic UI);
+ * without it the route locale is used if enabled, else the restaurant default.
  */
 export default async function PublicMenuPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ locale: string; restaurantSlug: string }>;
+  searchParams: Promise<{ lang?: string }>;
 }) {
   const { locale, restaurantSlug } = (await params) as {
     locale: Locale;
     restaurantSlug: string;
   };
-  const t = await getDictionary(locale);
-  const [menu, theme] = await Promise.all([
-    getMenuView(restaurantSlug, locale),
+  const [sp, t, settings, theme] = await Promise.all([
+    searchParams,
+    getDictionary(locale),
+    getRestaurantSettings(restaurantSlug),
     getRestaurantTheme(restaurantSlug),
   ]);
+  const language = resolveMenuLanguage({
+    requested: sp.lang,
+    routeLocale: locale,
+    supported: settings.supportedLanguages,
+    defaultLanguage: settings.defaultLanguage,
+  });
+  const menu = await getMenuView(restaurantSlug, language, settings.defaultLanguage);
   if (!menu) notFound();
 
   const labels: MenuViewLabels = {
@@ -55,6 +70,8 @@ export default async function PublicMenuPage({
       data={menu}
       labels={labels}
       chrome={chrome}
+      languages={settings.supportedLanguages}
+      language={language}
       className="overflow-hidden rounded-2xl border border-[rgb(var(--color-border))] shadow-[var(--shadow-pronounced)]"
     />
   );

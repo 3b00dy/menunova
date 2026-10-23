@@ -79,7 +79,7 @@
       "logo": "Logo URL",
       "logoHint": "Optional. Paste a link to your logo image.",
       "languages": "Menu languages",
-      "languagesHint": "Choose the languages your menu is offered in.",
+      "languagesHint": "Choose up to 3 languages your menu is offered in.",
       "defaultLanguage": "Default language"
     },
     "theme": {
@@ -253,6 +253,7 @@
       "supported": "Supported languages",
       "default": "Default language",
       "defaultHint": "Used as a fallback when a customer's language has no translation.",
+      "maxHint": "You can enable up to {n} languages.",
       "save": "Save changes",
       "saved": "Saved"
     },

@@ -20,7 +20,7 @@ export const ADMIN_THEME: RestaurantTheme = {
     border: "226 232 240",
   },
   typography: {
-    fontFamily: "'Inter', system-ui, sans-serif",
+    fontFamily: "'Inter', 'Noto Sans Arabic', system-ui, sans-serif",
     headingFamily: "'Inter', system-ui, sans-serif",
   },
   components: { borderRadius: "md", shadow: "soft", buttonStyle: "rounded" },
@@ -49,7 +49,7 @@ export function defaultTheme(direction: ThemeDirection = "ltr"): RestaurantTheme
       border: "226 232 240",
     },
     typography: {
-      fontFamily: "'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif",
+      fontFamily: "'Inter', 'Noto Sans Arabic', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif",
       headingFamily: "'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif",
     },
     components: { borderRadius: "md", shadow: "soft", buttonStyle: "rounded" },

@@ -19,6 +19,7 @@ import { menuRepository } from "@/features/menu/infrastructure/menu.repository";
 export async function getMenuView(
   slug: string,
   locale: string = "en",
+  fallback?: string,
 ): Promise<MenuView | null> {
   if (slug === "demo" || slug === "preview") return MOCK_MENU_VIEW;
 
@@ -26,5 +27,5 @@ export async function getMenuView(
   if (!restaurant) return null;
 
   const menu = await menuRepository.getByRestaurantSlug(slug).catch(() => null);
-  return buildMenuView({ menu, restaurantName: restaurant.name, locale });
+  return buildMenuView({ menu, restaurantName: restaurant.name, locale, fallback });
 }

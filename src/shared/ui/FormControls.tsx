@@ -2,32 +2,45 @@
 
 import { X } from 'lucide-react'
 import { Input, Label } from './Input'
-import { LANGUAGE_CODES, SUPPORTED_LANGUAGES } from '@/shared/i18n/languages'
+import { LANGUAGE_CODES, MAX_MENU_LANGUAGES, SUPPORTED_LANGUAGES } from '@/shared/i18n/languages'
 import { cn } from '@/shared/utils/cn'
 /**
  * Shared form controls used by the tenant settings/create forms so field
  * coverage and styling stay consistent with the backend input shapes.
  */
 
-/** Multi-select for `supportedLanguages` (string[]), rendered as toggle chips. */
+/**
+ * Multi-select for `supportedLanguages` (string[]), rendered as toggle chips.
+ * Offers every content language in the catalog; once `max` are selected the
+ * unselected chips are disabled and `hint` is shown.
+ */
 export function SupportedLanguagesField({
   label,
   value,
   onChange,
   primary,
+  max = MAX_MENU_LANGUAGES,
+  hint,
 }: {
   label: string
   value: string[]
   onChange: (next: string[]) => void
   /** The primary language is always included and can't be removed. */
   primary?: string
+  /** Maximum number of languages that can be selected. */
+  max?: number
+  /** Helper text, e.g. "Up to 3 languages". */
+  hint?: string
 }) {
   const selected = new Set(value)
+  if (primary) selected.add(primary)
+  const atMax = selected.size >= max
   const toggle = (code: string) => {
     if (code === primary) return
     const next = new Set(selected)
     if (next.has(code)) next.delete(code)
-    else next.add(code)
+    else if (!atMax) next.add(code)
+    else return
     onChange(Array.from(next))
   }
   return (
@@ -36,19 +49,22 @@ export function SupportedLanguagesField({
       <div className="flex flex-wrap gap-1.5">
         {LANGUAGE_CODES.map((code) => {
           const def = SUPPORTED_LANGUAGES[code]
-          const on = selected.has(code) || code === primary
+          const on = selected.has(code)
+          const disabled = !on && atMax
           return (
             <button
               key={code}
               type="button"
               onClick={() => toggle(code)}
               aria-pressed={on}
+              disabled={disabled}
               className={cn(
                 'rounded-full border px-3 py-1 text-xs transition-colors',
                 on
                   ? 'border-[rgb(var(--color-accent))] bg-[rgb(var(--color-accent))]/10 text-[rgb(var(--color-text))]'
                   : 'border-[rgb(var(--color-border))] text-[rgb(var(--color-muted))] hover:bg-[rgb(var(--color-surface))]',
                 code === primary && 'opacity-60 cursor-default',
+                disabled && 'opacity-40 cursor-not-allowed',
               )}
             >
               {def?.name ?? code}
@@ -56,6 +72,7 @@ export function SupportedLanguagesField({
           )
         })}
       </div>
+      {hint && <p className="text-xs text-[rgb(var(--color-muted))]">{hint}</p>}
     </div>
   )
 }

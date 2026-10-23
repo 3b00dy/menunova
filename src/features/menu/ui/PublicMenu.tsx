@@ -4,7 +4,7 @@ import { useState } from "react";
 import { LayoutGrid, Rows3, PanelLeft, Globe, Check, type LucideIcon } from "lucide-react";
 import type { ThemeConfig, LayoutMode } from "@/shared/theme/tenant-config";
 import { useLanguage } from "@/shared/i18n/useLanguage";
-import { SUPPORTED_LANGUAGES } from "@/shared/i18n/languages";
+import { languageDir, SUPPORTED_LANGUAGES } from "@/shared/i18n/languages";
 import { cn } from "@/shared/utils/cn";
 import type { MenuView, MenuViewLabels } from "@/features/menu/domain/menu-view";
 import { RestaurantMenu } from "@/features/menu/ui/RestaurantMenu";
@@ -28,18 +28,26 @@ const MODE_ICONS: Record<LayoutMode, LucideIcon> = {
  * floating chrome (language switcher + layout switcher) so the diner can read
  * the menu in their language and preferred layout. Initial layout comes from the
  * tenant theme; both are overridable locally.
+ *
+ * `languages` are the restaurant's enabled content languages (its language
+ * settings) and `language` is the one `data` was localized in — it may differ
+ * from the UI locale (e.g. Sorani `ckb` content under the Arabic UI).
  */
 export function PublicMenu({
   theme,
   data,
   labels,
   chrome,
+  languages,
+  language,
   className,
 }: {
   theme: ThemeConfig;
   data: MenuView;
   labels: MenuViewLabels;
   chrome: MenuChromeLabels;
+  languages: string[];
+  language: string;
   className?: string;
 }) {
   const [layout, setLayout] = useState<LayoutMode>(theme.components.layout);
@@ -51,12 +59,9 @@ export function PublicMenu({
   };
 
   return (
-    <div className={cn("relative", className)}>
+    <div className={cn("relative", className)} dir={languageDir(language)} lang={language}>
       <div className="absolute end-3 top-3 z-20 flex items-center gap-2">
-        <LanguageMenu
-          supported={theme.languages.supported}
-          label={chrome.language}
-        />
+        <LanguageMenu supported={languages} current={language} label={chrome.language} />
         <div
           className="flex gap-0.5 rounded-full bg-black/45 p-1 backdrop-blur"
           role="radiogroup"
@@ -91,8 +96,16 @@ export function PublicMenu({
   );
 }
 
-function LanguageMenu({ supported, label }: { supported: string[]; label: string }) {
-  const { lang, setLang } = useLanguage();
+function LanguageMenu({
+  supported,
+  current,
+  label,
+}: {
+  supported: string[];
+  current: string;
+  label: string;
+}) {
+  const { setMenuLanguage } = useLanguage();
   const [open, setOpen] = useState(false);
 
   const codes = supported.filter((code) => SUPPORTED_LANGUAGES[code]);
@@ -109,7 +122,7 @@ function LanguageMenu({ supported, label }: { supported: string[]; label: string
         className="flex h-10 items-center gap-1.5 rounded-full bg-black/45 px-3 text-xs font-semibold text-white backdrop-blur transition-colors hover:bg-black/60"
       >
         <Globe className="h-4 w-4" />
-        {lang.toUpperCase()}
+        {SUPPORTED_LANGUAGES[current]?.badge ?? current.toUpperCase()}
       </button>
 
       {open && (
@@ -121,7 +134,7 @@ function LanguageMenu({ supported, label }: { supported: string[]; label: string
           >
             {codes.map((code) => {
               const def = SUPPORTED_LANGUAGES[code];
-              const active = code === lang;
+              const active = code === current;
               return (
                 <li key={code} role="none">
                   <button
@@ -130,7 +143,7 @@ function LanguageMenu({ supported, label }: { supported: string[]; label: string
                     aria-checked={active}
                     onClick={() => {
                       setOpen(false);
-                      if (!active) setLang(code);
+                      if (!active) setMenuLanguage(code);
                     }}
                     className="flex w-full items-center justify-between gap-3 px-3 py-2 text-start hover:bg-zinc-100"
                   >

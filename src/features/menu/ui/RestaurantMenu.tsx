@@ -77,9 +77,11 @@ export function RestaurantMenu({
     "--pv-shadow": SHADOW_VALUES[components.shadow],
     backgroundColor: "var(--pv-bg)",
     color: "var(--pv-text)",
-    fontFamily: `'${typography.bodyFont}', system-ui, sans-serif`,
+    // Noto Sans Arabic backfills Arabic-script glyphs (incl. Sorani ڕ ڵ ێ ۆ ە)
+    // that a tenant's Latin-first font lacks.
+    fontFamily: `'${typography.bodyFont}', 'Noto Sans Arabic', system-ui, sans-serif`,
   };
-  const headingFont = `'${typography.headingFont}', Georgia, serif`;
+  const headingFont = `'${typography.headingFont}', 'Noto Sans Arabic', Georgia, serif`;
 
   const items = itemsInCategory(data, activeCategory);
   const promos = promotedItems(data);

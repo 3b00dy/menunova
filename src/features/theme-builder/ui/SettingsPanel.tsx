@@ -2,6 +2,7 @@
 
 import type { Locale } from "@/shared/i18n/config";
 import type { Dictionary } from "@/shared/i18n/getDictionary";
+import { MAX_MENU_LANGUAGES } from "@/shared/i18n/languages";
 import { Input } from "@/shared/ui";
 import { cn } from "@/shared/utils/cn";
 import {
@@ -139,6 +140,8 @@ function LanguagesSection({
     const isOn = supported.includes(code);
     // Never drop the default language.
     if (isOn && code === defaultLang) return;
+    // Cap the menu at MAX_MENU_LANGUAGES (BRD BR-RA-02).
+    if (!isOn && supported.length >= MAX_MENU_LANGUAGES) return;
     const next = isOn ? supported.filter((c) => c !== code) : [...supported, code];
     update("languages", { supported: next });
   };
@@ -153,11 +156,13 @@ function LanguagesSection({
           <div className="flex flex-wrap gap-1.5">
             {LANGUAGE_OPTIONS.map((lang) => {
               const on = supported.includes(lang.code);
+              const disabled = !on && supported.length >= MAX_MENU_LANGUAGES;
               return (
                 <button
                   key={lang.code}
                   type="button"
                   aria-pressed={on}
+                  disabled={disabled}
                   onClick={() => toggleSupported(lang.code)}
                   className={cn(
                     "rounded-full border px-3 py-1 text-xs transition-colors",
@@ -165,6 +170,7 @@ function LanguagesSection({
                       ? "border-[rgb(var(--color-accent))] bg-[rgb(var(--color-accent))]/10 text-[rgb(var(--color-text))]"
                       : "border-[rgb(var(--color-border))] text-[rgb(var(--color-muted))] hover:bg-[rgb(var(--color-surface))]",
                     lang.code === defaultLang && "opacity-70",
+                    disabled && "cursor-not-allowed opacity-40",
                   )}
                 >
                   {lang.name}

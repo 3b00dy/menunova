@@ -14,7 +14,7 @@ import {
 } from "lucide-react";
 import { useI18n } from "@/shared/i18n/I18nProvider";
 import { routes } from "@/shared/config/routes";
-import { SUPPORTED_LANGUAGES } from "@/shared/i18n/languages";
+import { MAX_MENU_LANGUAGES, SUPPORTED_LANGUAGES } from "@/shared/i18n/languages";
 import { Button, Card, Field, Input, BrandLogo } from "@/shared/ui";
 import {
   RESTAURANT_PLANS,
@@ -109,6 +109,8 @@ export function OnboardingWizard() {
 
   function toggleLanguage(code: string) {
     const has = state.supportedLanguages.includes(code);
+    // Cap the menu at MAX_MENU_LANGUAGES (BRD BR-RA-02).
+    if (!has && state.supportedLanguages.length >= MAX_MENU_LANGUAGES) return;
     let supported = has
       ? state.supportedLanguages.filter((c) => c !== code)
       : [...state.supportedLanguages, code];
@@ -506,12 +508,14 @@ function RestaurantStep({
           <div className="flex flex-wrap gap-2">
             {LANG_CODES.map((code) => {
               const on = state.supportedLanguages.includes(code);
+              const disabled = !on && state.supportedLanguages.length >= MAX_MENU_LANGUAGES;
               return (
                 <button
                   key={code}
                   type="button"
+                  disabled={disabled}
                   onClick={() => toggleLanguage(code)}
-                  className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm font-medium transition-colors ${
+                  className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-40 ${
                     on
                       ? "border-transparent bg-[rgb(var(--color-primary))] text-[rgb(var(--color-primary-fg))]"
                       : "border-[rgb(var(--color-border))] bg-[rgb(var(--color-surface))] text-[rgb(var(--color-text))] hover:border-[rgb(var(--color-primary))]"

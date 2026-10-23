@@ -4,7 +4,7 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Check } from "lucide-react";
 import { useI18n } from "@/shared/i18n/I18nProvider";
-import { SUPPORTED_LANGUAGES } from "@/shared/i18n/languages";
+import { MAX_MENU_LANGUAGES, SUPPORTED_LANGUAGES } from "@/shared/i18n/languages";
 import { Button, Card, CardBody, Field, SupportedLanguagesField } from "@/shared/ui";
 import type { RestaurantSettings } from "@/features/restaurant/domain/restaurant-settings.entity";
 import { updateRestaurantLanguages } from "@/features/restaurant/application/update-restaurant-languages";
@@ -47,6 +47,7 @@ export function LanguageSettingsForm({
           label={s.supported}
           value={supported}
           primary={defaultLanguage}
+          hint={s.maxHint.replace("{n}", String(MAX_MENU_LANGUAGES))}
           onChange={(next) => {
             setSaved(false);
             setSupported(next);
