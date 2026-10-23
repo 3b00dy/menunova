@@ -1,7 +1,9 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { locales } from "@/shared/i18n/config";
 import type { Locale } from "@/shared/i18n/config";
 import { getDictionary } from "@/shared/i18n/getDictionary";
-import { resolveMenuLanguage } from "@/shared/i18n/languages";
+import { resolveRequestMenuLanguage } from "@/shared/i18n/request-menu-language";
 import { getRestaurantSettings, getRestaurantTheme } from "@/features/restaurant";
 import { getMenuView, PublicMenu, type MenuViewLabels } from "@/features/menu";
 
@@ -15,8 +17,43 @@ import { getMenuView, PublicMenu, type MenuViewLabels } from "@/features/menu";
  *
  * Content language is separate from the UI locale: `?lang=` picks one of the
  * restaurant's enabled languages (e.g. Sorani `ckb`, shown under the Arabic UI);
- * without it the route locale is used if enabled, else the restaurant default.
+ * without it the device's remembered choice, then the route locale, then the
+ * restaurant default. First-time visitors get a language splash.
  */
+/**
+ * Indexable title/description per restaurant (BRD NFR-09), Open Graph with the
+ * restaurant logo for link previews, and `hreflang` alternates per UI locale.
+ */
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string; restaurantSlug: string }>;
+}): Promise<Metadata> {
+  const { locale, restaurantSlug } = (await params) as {
+    locale: Locale;
+    restaurantSlug: string;
+  };
+  const [t, menu, theme] = await Promise.all([
+    getDictionary(locale),
+    getMenuView(restaurantSlug, locale),
+    getRestaurantTheme(restaurantSlug),
+  ]);
+  if (!menu) return {};
+
+  const name = menu.restaurant.name;
+  const title = t.menu.metaTitle.replace("{name}", name);
+  const description = t.menu.metaDescription.replace("{name}", name);
+  const logo = theme.brandAssets.logoUrl;
+  return {
+    title,
+    description,
+    alternates: {
+      languages: Object.fromEntries(locales.map((l) => [l, `/${l}/r/${restaurantSlug}`])),
+    },
+    openGraph: { title, description, type: "website", ...(logo ? { images: [logo] } : {}) },
+  };
+}
+
 export default async function PublicMenuPage({
   params,
   searchParams,
@@ -34,7 +71,7 @@ export default async function PublicMenuPage({
     getRestaurantSettings(restaurantSlug),
     getRestaurantTheme(restaurantSlug),
   ]);
-  const language = resolveMenuLanguage({
+  const { language, askLanguage } = await resolveRequestMenuLanguage({
     requested: sp.lang,
     routeLocale: locale,
     supported: settings.supportedLanguages,
@@ -62,6 +99,7 @@ export default async function PublicMenuPage({
     nav: t.menu.layoutNav,
     sidebar: t.menu.layoutSidebar,
     language: t.menu.language,
+    chooseLanguage: t.menu.chooseLanguage,
   };
 
   return (
@@ -72,6 +110,7 @@ export default async function PublicMenuPage({
       chrome={chrome}
       languages={settings.supportedLanguages}
       language={language}
+      askLanguage={askLanguage}
       className="overflow-hidden rounded-2xl border border-[rgb(var(--color-border))] shadow-[var(--shadow-pronounced)]"
     />
   );

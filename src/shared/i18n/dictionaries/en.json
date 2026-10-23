@@ -43,7 +43,7 @@
   },
   "onboarding": {
     "header": { "haveAccount": "Already have an account?", "signIn": "Sign in" },
-    "steps": { "account": "Account", "plan": "Plan", "restaurant": "Restaurant", "theme": "Theme", "payment": "Payment" },
+    "steps": { "account": "Account", "plan": "Plan", "restaurant": "Restaurant", "theme": "Theme", "menu": "Menu", "payment": "Payment" },
     "account": {
       "title": "Create your account",
       "subtitle": "You'll be the admin of your restaurant.",
@@ -88,6 +88,17 @@
       "brandColor": "Brand color",
       "customColor": "Custom color"
     },
+    "menu": {
+      "title": "Add your first dish",
+      "subtitle": "Start your menu with one category and one item. You can skip this and add them later from your dashboard.",
+      "categoryName": "Category name",
+      "categoryPlaceholder": "e.g. Grills",
+      "itemName": "First item (optional)",
+      "itemPlaceholder": "e.g. Lamb kebab",
+      "price": "Price (IQD)",
+      "languageHint": "Written in {lang}. Add translations later in the menu editor.",
+      "skip": "Skip for now"
+    },
     "payment": {
       "title": "Confirm & create",
       "subtitle": "Payment is mocked in this demo — no card is charged.",
@@ -126,6 +137,14 @@
     "demoBanner": "You're exploring the demo. Changes are sandboxed and won't be saved.",
     "overview": {
       "subtitle": "Here's how your menu and account are doing.",
+      "setup": {
+        "title": "Finish setting up",
+        "progress": "{done} of {total} done",
+        "addCategory": "Add your first category",
+        "addItem": "Add your first menu item",
+        "addLogo": "Add your logo",
+        "translate": "Translate your menu into every language"
+      },
       "kpis": {
         "categories": "Categories",
         "items": "Menu items",
@@ -328,6 +347,9 @@
     "back": "Back",
     "close": "Close",
     "language": "Language",
+    "chooseLanguage": "Choose your language",
+    "metaTitle": "{name} — Menu",
+    "metaDescription": "Browse the {name} menu: dishes, prices and what's available today.",
     "layout": "View",
     "layoutCategories": "Categories only",
     "layoutNav": "Nav + items",
@@ -350,6 +372,15 @@
       "category": "Category",
       "available": "Available",
       "unavailable": "Unavailable",
+      "availabilityTitle": "Item availability",
+      "availabilityHint": "Tap a switch to mark an item sold out or available again. Guests see the change on the menu within a minute.",
+      "missingTranslation": "Missing: {langs}",
+      "reorder": "Reorder",
+      "reorderTitle": "Reorder categories",
+      "reorderHint": "Drag categories (or use the arrows) into the order guests should see them.",
+      "dragHandle": "Drag to reorder",
+      "moveUp": "Move up",
+      "moveDown": "Move down",
       "imageUrl": "Image URL",
       "imageUrlHint": "Optional. Paste a link to the item photo.",
       "itemsCount": "items",

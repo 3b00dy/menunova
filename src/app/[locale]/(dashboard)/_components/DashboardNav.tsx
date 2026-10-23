@@ -24,6 +24,8 @@ import { LogoutButton } from "@/features/auth/ui/LogoutButton";
 export interface DashboardCaps {
   /** View the menu (and, for staff, toggle availability). */
   menu: boolean;
+  /** Full menu CRUD. False for availability-only staff. */
+  menuManage: boolean;
   /** Customize the public theme. */
   theme: boolean;
   /** Restaurant settings (languages, billing). */
@@ -44,9 +46,11 @@ export interface DashboardCaps {
  */
 function useNavItems(caps: DashboardCaps): NavItem[] {
   const { locale, dictionary: t } = useI18n();
-  const items: NavItem[] = [
-    { href: routes.dashboard(locale), label: t.dashboard.title, icon: LayoutDashboard, end: true },
-  ];
+  // Availability-only staff have no overview — their home is the menu (BR-ST-01).
+  const availabilityOnly = caps.menu && !caps.menuManage && !caps.restaurants;
+  const items: NavItem[] = availabilityOnly
+    ? []
+    : [{ href: routes.dashboard(locale), label: t.dashboard.title, icon: LayoutDashboard, end: true }];
   if (caps.restaurants) {
     items.push({
       href: routes.dashboardRestaurants(locale),

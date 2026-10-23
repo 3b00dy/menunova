@@ -39,6 +39,7 @@ export { computeMenuStats } from "@/features/menu/domain/menu.stats";
 // Use-cases
 export { getMenu } from "@/features/menu/application/get-menu";
 export { getMenuView } from "@/features/menu/application/get-menu-view";
+export { provisionFirstMenu } from "@/features/menu/application/provision-first-menu";
 export {
   createMenuItem,
   updateMenuItem,

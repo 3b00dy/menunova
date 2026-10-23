@@ -1,9 +1,12 @@
+import { redirect } from "next/navigation";
 import type { Locale } from "@/shared/i18n/config";
+import { routes } from "@/shared/config/routes";
 import { getDictionary } from "@/shared/i18n/getDictionary";
 import { getMenu, computeMenuStats } from "@/features/menu";
 import {
   getRestaurantSettings,
   getRestaurantBySlug,
+  getRestaurantTheme,
   listRestaurants,
   computePlatformStats,
   type Restaurant,
@@ -21,6 +24,13 @@ export default async function DashboardHome({
 }) {
   const { locale } = (await params) as { locale: Locale };
   const access = await getDashboardAccess();
+
+  // Staff hold only `menu:availability`: skip the account overview (plan,
+  // stats) and land them on their one task — item availability (BR-ST-01).
+  if (access.caps.menu && !access.caps.menuManage && !access.caps.restaurants) {
+    redirect(routes.dashboardMenu(locale));
+  }
+
   const t = await getDictionary(locale);
 
   // Super admin manages no single restaurant — show the platform overview.
@@ -43,10 +53,11 @@ export default async function DashboardHome({
 
   const slug = access.restaurantId ?? "demo";
 
-  const [menu, settings, restaurant] = await Promise.all([
+  const [menu, settings, restaurant, theme] = await Promise.all([
     getMenu(slug),
     getRestaurantSettings(slug),
     getRestaurantBySlug(slug),
+    getRestaurantTheme(slug),
   ]);
 
   const stats = computeMenuStats(menu, settings.supportedLanguages);
@@ -61,6 +72,7 @@ export default async function DashboardHome({
       supportedLanguages={settings.supportedLanguages}
       defaultLanguage={settings.defaultLanguage}
       stats={stats}
+      logoUrl={theme.brandAssets.logoUrl || restaurant?.logoUrl}
       dict={t.dashboard}
       locale={locale}
       caps={access.caps}

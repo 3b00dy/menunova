@@ -10,6 +10,7 @@ import {
   provisionRestaurantLanguages,
   type RestaurantPlan,
 } from "@/features/restaurant";
+import { provisionFirstMenu } from "@/features/menu";
 import type { Session } from "@/features/auth/domain/session.entity";
 import { authRepository } from "@/features/auth/infrastructure/auth.repository";
 
@@ -48,6 +49,11 @@ export async function registerOwner(input: {
   };
   defaultLanguage: string;
   supportedLanguages: string[];
+  /** Optional first category (+ item) from the wizard's menu step. */
+  firstMenu?: {
+    categoryName: string;
+    item?: { name: string; priceMinor: number; currency: string };
+  };
 }): Promise<{ error: string } | void> {
   const name = input.name.trim();
   const email = input.email.trim();
@@ -90,6 +96,23 @@ export async function registerOwner(input: {
     { defaultLanguage, supportedLanguages },
     session.token,
   );
+
+  // Seed the first category/item. Best-effort: the account and restaurant
+  // already exist, so a failure here must not fail signup — the owner can add
+  // them from the dashboard's setup checklist.
+  const categoryName = input.firstMenu?.categoryName.trim();
+  if (categoryName) {
+    const item = input.firstMenu?.item;
+    await provisionFirstMenu(
+      slug,
+      {
+        language: defaultLanguage,
+        categoryName,
+        item: item?.name.trim() && item.priceMinor >= 0 ? { ...item, name: item.name.trim() } : undefined,
+      },
+      session.token,
+    ).catch(() => undefined);
+  }
 
   await setServerSession(session.token);
   redirect(routes.dashboard(input.locale));

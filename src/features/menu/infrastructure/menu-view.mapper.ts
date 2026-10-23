@@ -13,10 +13,6 @@ import type { MenuView, MenuViewItem } from "@/features/menu/domain/menu-view";
  * renderer already handles their absence.
  */
 
-/** Neutral food image for categories that have no item image to borrow. */
-const FALLBACK_CATEGORY_IMAGE =
-  "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=400&h=300&fit=crop";
-
 export function buildMenuView(args: {
   menu: Menu | null;
   restaurantName: string;
@@ -42,9 +38,8 @@ export function buildMenuView(args: {
     .map((category) => ({
       id: category.id,
       name: localize(category.name, locale, fallback),
-      imageUrl:
-        items.find((i) => i.categoryId === category.id && i.imageUrl)?.imageUrl ??
-        FALLBACK_CATEGORY_IMAGE,
+      // Borrow the first item photo; none → the renderer shows a branded tile.
+      imageUrl: items.find((i) => i.categoryId === category.id && i.imageUrl)?.imageUrl,
     }));
 
   return {

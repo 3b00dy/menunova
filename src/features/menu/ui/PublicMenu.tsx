@@ -15,6 +15,8 @@ export interface MenuChromeLabels {
   nav: string;
   sidebar: string;
   language: string;
+  /** Splash prompt, e.g. "Choose your language". */
+  chooseLanguage: string;
 }
 
 const MODE_ICONS: Record<LayoutMode, LucideIcon> = {
@@ -40,6 +42,7 @@ export function PublicMenu({
   chrome,
   languages,
   language,
+  askLanguage = false,
   className,
 }: {
   theme: ThemeConfig;
@@ -48,9 +51,12 @@ export function PublicMenu({
   chrome: MenuChromeLabels;
   languages: string[];
   language: string;
+  /** First visit to a multi-language menu: show the language splash (BR-QR-03). */
+  askLanguage?: boolean;
   className?: string;
 }) {
   const [layout, setLayout] = useState<LayoutMode>(theme.components.layout);
+  const [splashOpen, setSplashOpen] = useState(askLanguage);
 
   const modeLabel: Record<LayoutMode, string> = {
     categories: chrome.categories,
@@ -92,6 +98,103 @@ export function PublicMenu({
       </div>
 
       <RestaurantMenu theme={theme} data={data} layout={layout} labels={labels} />
+
+      {splashOpen && (
+        <LanguageSplash
+          theme={theme}
+          restaurantName={data.restaurant.name}
+          prompt={chrome.chooseLanguage}
+          languages={languages}
+          current={language}
+          onDone={() => setSplashOpen(false)}
+        />
+      )}
+    </div>
+  );
+}
+
+/**
+ * Branded first-visit splash (BRD BR-QR-03 / US-QR-02): the restaurant's logo,
+ * name and colours, and its enabled languages — each named in its own script so
+ * any guest can find theirs. The choice is remembered on the device.
+ */
+function LanguageSplash({
+  theme,
+  restaurantName,
+  prompt,
+  languages,
+  current,
+  onDone,
+}: {
+  theme: ThemeConfig;
+  restaurantName: string;
+  prompt: string;
+  languages: string[];
+  current: string;
+  onDone: () => void;
+}) {
+  const { setMenuLanguage, rememberMenuLanguage } = useLanguage();
+  const codes = languages.filter((code) => SUPPORTED_LANGUAGES[code]);
+  const { brandColors: c, brandAssets, typography } = theme;
+
+  const choose = (code: string) => {
+    onDone();
+    if (code === current) rememberMenuLanguage(code);
+    else setMenuLanguage(code);
+  };
+
+  return (
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="language-splash-title"
+      className="fixed inset-0 z-50 flex flex-col items-center justify-center gap-8 p-6 text-center"
+      style={{
+        backgroundColor: c.background,
+        color: c.text,
+        fontFamily: `'${typography.bodyFont}', 'Noto Sans Arabic', system-ui, sans-serif`,
+      }}
+    >
+      <div className="flex flex-col items-center gap-3">
+        {brandAssets.logoUrl ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={brandAssets.logoUrl} alt="" className="h-20 w-20 rounded-2xl object-cover" />
+        ) : (
+          <span
+            aria-hidden
+            className="grid h-20 w-20 place-items-center rounded-2xl text-3xl font-bold text-white"
+            style={{ backgroundColor: c.primary }}
+          >
+            {restaurantName.trim().charAt(0).toUpperCase()}
+          </span>
+        )}
+        <h1 className="text-2xl font-bold">{restaurantName}</h1>
+        <p id="language-splash-title" className="flex items-center gap-1.5 text-sm opacity-70">
+          <Globe className="h-4 w-4" />
+          {prompt}
+        </p>
+      </div>
+
+      <ul className="flex w-full max-w-xs flex-col gap-3">
+        {codes.map((code, i) => {
+          const def = SUPPORTED_LANGUAGES[code];
+          return (
+            <li key={code}>
+              <button
+                type="button"
+                autoFocus={i === 0}
+                lang={code}
+                dir={def.dir}
+                onClick={() => choose(code)}
+                className="h-12 w-full rounded-full text-base font-semibold text-white transition-opacity hover:opacity-90"
+                style={{ backgroundColor: c.primary }}
+              >
+                {def.name}
+              </button>
+            </li>
+          );
+        })}
+      </ul>
     </div>
   );
 }

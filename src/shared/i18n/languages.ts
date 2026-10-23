@@ -36,6 +36,15 @@ export const SUPPORTED_LANGUAGES: Record<string, LanguageDef> = {
 
 export const LANGUAGE_CODES: string[] = Object.keys(SUPPORTED_LANGUAGES);
 
+/**
+ * Cookie remembering the guest's chosen menu language on this device (BRD
+ * BR-QR-04 / US-QR-02 AC3). Needed for content languages with no route of their
+ * own (e.g. `ckb`); `en`/`ar` are also remembered by the UI-locale cookie.
+ */
+export const MENU_LANGUAGE_COOKIE = "mn_menu_lang";
+/** Language-preference cookies persist for a year (not just the session). */
+export const LANGUAGE_COOKIE_MAX_AGE = 60 * 60 * 24 * 365;
+
 /** A restaurant can enable at most this many menu languages (BRD BR-RA-02). */
 export const MAX_MENU_LANGUAGES = 3;
 

@@ -28,7 +28,8 @@ export interface MenuViewItem {
 export interface MenuViewCategory {
   id: string;
   name: string;
-  imageUrl: string;
+  /** Absent when no item in the category has a photo — rendered as a branded tile. */
+  imageUrl?: string;
 }
 
 export type SocialType = "instagram" | "tiktok" | "facebook" | "other";

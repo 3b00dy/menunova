@@ -1,6 +1,7 @@
 import type { Locale } from "@/shared/i18n/config";
 import { getDictionary } from "@/shared/i18n/getDictionary";
-import { languageDir, resolveMenuLanguage } from "@/shared/i18n/languages";
+import { languageDir } from "@/shared/i18n/languages";
+import { resolveRequestMenuLanguage } from "@/shared/i18n/request-menu-language";
 import { getMenu, MenuBoard } from "@/features/menu";
 import { getRestaurantSettings } from "@/features/restaurant";
 
@@ -23,7 +24,7 @@ export default async function PublicMenuCategoryPage({
     getRestaurantSettings(restaurantSlug),
     getMenu(restaurantSlug),
   ]);
-  const language = resolveMenuLanguage({
+  const { language } = await resolveRequestMenuLanguage({
     requested: sp.lang,
     routeLocale: locale,
     supported: settings.supportedLanguages,

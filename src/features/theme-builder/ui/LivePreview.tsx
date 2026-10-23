@@ -54,6 +54,7 @@ export function LivePreview({
           data={menu}
           layout={config.components.layout}
           labels={labels}
+          showAddToCart
         />
       </div>
     </div>

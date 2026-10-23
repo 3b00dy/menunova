@@ -41,12 +41,20 @@ export function RestaurantMenu({
   data,
   layout,
   labels,
+  showAddToCart = false,
   className,
 }: {
   theme: ThemeConfig;
   data: MenuView;
   layout: LayoutMode;
   labels: MenuViewLabels;
+  /**
+   * Show the item modal's "Add to cart" button. Off by default: guest ordering
+   * (cart + WhatsApp checkout, BRD §6) isn't built yet, so on the public menu the
+   * button would do nothing. The Theme Builder preview turns it on so owners can
+   * see their button style.
+   */
+  showAddToCart?: boolean;
   className?: string;
 }) {
   const { brandColors: c, typography, components, brandAssets } = theme;
@@ -177,6 +185,7 @@ export function RestaurantMenu({
             labels={labels}
             buttonStyle={buttonStyle}
             headingFont={headingFont}
+            showAddToCart={showAddToCart}
             onClose={() => setSelectedItem(null)}
           />
         )}
@@ -364,12 +373,23 @@ function CategoryGrid({
           className="group relative aspect-[4/3] overflow-hidden text-start"
           style={{ borderRadius: "var(--pv-radius)", boxShadow: "var(--pv-shadow)" }}
         >
-          {/* eslint-disable-next-line @next/next/no-img-element -- mock/tenant asset */}
-          <img
-            src={cat.imageUrl}
-            alt=""
-            className="absolute inset-0 h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-          />
+          {cat.imageUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element -- mock/tenant asset
+            <img
+              src={cat.imageUrl}
+              alt=""
+              className="absolute inset-0 h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+            />
+          ) : (
+            // Branded placeholder (US-QR-05 AC2): brand colour + the category initial.
+            <span
+              aria-hidden
+              className="absolute inset-0 grid place-items-center text-5xl font-bold text-white/30"
+              style={{ backgroundColor: "var(--pv-primary)", fontFamily: headingFont }}
+            >
+              {cat.name.charAt(0)}
+            </span>
+          )}
           <span className="absolute inset-0 bg-gradient-to-t from-black/75 to-transparent" />
           <span
             className="absolute inset-x-0 bottom-0 p-3 text-sm font-semibold text-white"
@@ -453,8 +473,18 @@ function CategorySidebar({
                   color: isActive ? "var(--pv-primary)" : "var(--pv-secondary)",
                 }}
               >
-                {/* eslint-disable-next-line @next/next/no-img-element -- mock/tenant asset */}
-                <img src={cat.imageUrl} alt="" className="h-7 w-7 shrink-0 rounded-md object-cover" />
+                {cat.imageUrl ? (
+                  // eslint-disable-next-line @next/next/no-img-element -- mock/tenant asset
+                  <img src={cat.imageUrl} alt="" className="h-7 w-7 shrink-0 rounded-md object-cover" />
+                ) : (
+                  <span
+                    aria-hidden
+                    className="grid h-7 w-7 shrink-0 place-items-center rounded-md text-xs font-bold"
+                    style={{ backgroundColor: "var(--pv-primary-soft)", color: "var(--pv-primary)" }}
+                  >
+                    {cat.name.charAt(0)}
+                  </span>
+                )}
                 <span className="truncate">{cat.name}</span>
               </button>
             </li>
@@ -632,12 +662,14 @@ function ItemDetailModal({
   labels,
   buttonStyle,
   headingFont,
+  showAddToCart,
   onClose,
 }: {
   item: MenuViewItem;
   labels: MenuViewLabels;
   buttonStyle: ButtonStyle;
   headingFont: string;
+  showAddToCart: boolean;
   onClose: () => void;
 }) {
   const soldOut = item.available === false;
@@ -724,7 +756,9 @@ function ItemDetailModal({
               </div>
             )}
 
-            {!soldOut && <ModalAddButton buttonStyle={buttonStyle} label={labels.addToCart} />}
+            {showAddToCart && !soldOut && (
+              <ModalAddButton buttonStyle={buttonStyle} label={labels.addToCart} />
+            )}
           </div>
         </div>
       </motion.div>

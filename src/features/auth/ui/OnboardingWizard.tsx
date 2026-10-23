@@ -22,8 +22,8 @@ import {
 } from "@/features/restaurant/domain/restaurant.entity";
 import { registerOwner } from "@/features/auth/application/registerOwner";
 
-type StepId = "account" | "plan" | "restaurant" | "theme" | "payment";
-const STEP_IDS: StepId[] = ["account", "plan", "restaurant", "theme", "payment"];
+type StepId = "account" | "plan" | "restaurant" | "theme" | "menu" | "payment";
+const STEP_IDS: StepId[] = ["account", "plan", "restaurant", "theme", "menu", "payment"];
 
 /** Cosmetic monthly price per plan (mock checkout — nothing is charged). */
 const PLAN_PRICES: Record<RestaurantPlan, number> = { free: 0, pro: 49, enterprise: 99 };
@@ -31,6 +31,9 @@ const RECOMMENDED_PLAN: RestaurantPlan = "pro";
 
 /** Brand-color swatches for the theme step; stored as the restaurant's brandColor. */
 const BRAND_COLORS = ["#D97706", "#DC2626", "#059669", "#2563EB", "#7C3AED", "#DB2777", "#0891B2", "#CA8A04"];
+
+/** Currency for the optional first item (matches the menu editor's default). */
+const FIRST_ITEM_CURRENCY = "IQD";
 
 const LANG_CODES = Object.keys(SUPPORTED_LANGUAGES);
 const langName = (code: string) => SUPPORTED_LANGUAGES[code]?.name ?? code.toUpperCase();
@@ -58,6 +61,11 @@ interface State {
   supportedLanguages: string[];
   defaultLanguage: string;
   brandColor: string;
+  /** Optional first category + item (menu step, BR-LP-05). */
+  categoryName: string;
+  itemName: string;
+  /** Item price in major units as typed (e.g. "12000"). */
+  itemPrice: string;
   cardholder: string;
   cardNumber: string;
   expiry: string;
@@ -77,6 +85,9 @@ const INITIAL: State = {
   supportedLanguages: ["en", "ar"],
   defaultLanguage: "en",
   brandColor: BRAND_COLORS[0],
+  categoryName: "",
+  itemName: "",
+  itemPrice: "",
   cardholder: "",
   cardNumber: "",
   expiry: "",
@@ -85,7 +96,7 @@ const INITIAL: State = {
 
 /**
  * Multi-step self-serve onboarding: account → plan → restaurant → theme →
- * payment. On completion it calls the `registerOwner` Server Action, which
+ * menu (optional first category + item) → payment. On completion it calls the `registerOwner` Server Action, which
  * provisions the restaurant + its language settings, logs the owner in, and
  * redirects to their dashboard. Payment is mocked (no charge). Fields map only
  * to what the API stores (name, slug, plan, logo, brand color, languages).
@@ -138,6 +149,18 @@ export function OnboardingWizard() {
         },
         defaultLanguage: state.defaultLanguage,
         supportedLanguages: state.supportedLanguages,
+        firstMenu: state.categoryName.trim()
+          ? {
+              categoryName: state.categoryName,
+              item: state.itemName.trim()
+                ? {
+                    name: state.itemName,
+                    priceMinor: Math.round(Number(state.itemPrice) * 100),
+                    currency: FIRST_ITEM_CURRENCY,
+                  }
+                : undefined,
+            }
+          : undefined,
       });
       if (res?.error) {
         const errors = o.errors as Record<string, string>;
@@ -196,6 +219,15 @@ export function OnboardingWizard() {
             brandColor={state.brandColor}
             onSelect={(brandColor) => patch({ brandColor })}
             labels={o.theme}
+            onNext={next}
+            onBack={back}
+          />
+        )}
+        {step === "menu" && (
+          <MenuStep
+            state={state}
+            patch={patch}
+            labels={o.menu}
             onNext={next}
             onBack={back}
           />
@@ -600,6 +632,86 @@ function ThemeStep({
         </Field>
       </Card>
       <StepNav onBack={onBack} onNext={onNext} nextLabel={t.common.continue} />
+    </>
+  );
+}
+
+/**
+ * Optional "first dish" step (BRD BR-LP-05): one category and, optionally, one
+ * item, written in the restaurant's default language. Fully skippable.
+ */
+function MenuStep({
+  state,
+  patch,
+  labels,
+  onNext,
+  onBack,
+}: {
+  state: State;
+  patch: (p: Partial<State>) => void;
+  labels: O["menu"];
+  onNext: () => void;
+  onBack: () => void;
+}) {
+  const { dictionary: t } = useI18n();
+  const hasItem = state.itemName.trim() !== "";
+  const price = Number(state.itemPrice);
+  const priceValid = state.itemPrice.trim() !== "" && Number.isFinite(price) && price >= 0;
+  // An item needs a category and a valid price; an empty step is a valid skip.
+  const valid = !hasItem || (state.categoryName.trim() !== "" && priceValid);
+  const dir = SUPPORTED_LANGUAGES[state.defaultLanguage]?.dir ?? "ltr";
+
+  return (
+    <>
+      <StepHeader title={labels.title} description={labels.subtitle} />
+      <Card className="space-y-5 p-6 sm:p-8">
+        <p className="text-xs text-[rgb(var(--color-muted))]">
+          {labels.languageHint.replace("{lang}", langName(state.defaultLanguage))}
+        </p>
+        <Field label={labels.categoryName}>
+          <Input
+            dir={dir}
+            value={state.categoryName}
+            onChange={(e) => patch({ categoryName: e.target.value })}
+            placeholder={labels.categoryPlaceholder}
+          />
+        </Field>
+        <div className="grid gap-4 sm:grid-cols-[1fr_10rem]">
+          <Field label={labels.itemName}>
+            <Input
+              dir={dir}
+              value={state.itemName}
+              onChange={(e) => patch({ itemName: e.target.value })}
+              placeholder={labels.itemPlaceholder}
+            />
+          </Field>
+          <Field label={labels.price}>
+            <Input
+              type="number"
+              inputMode="decimal"
+              min={0}
+              step="any"
+              dir="ltr"
+              value={state.itemPrice}
+              onChange={(e) => patch({ itemPrice: e.target.value })}
+              disabled={!hasItem}
+            />
+          </Field>
+        </div>
+      </Card>
+      <StepNav onBack={onBack} onNext={onNext} nextLabel={t.common.continue} nextDisabled={!valid} />
+      <div className="mt-3 text-center">
+        <button
+          type="button"
+          onClick={() => {
+            patch({ categoryName: "", itemName: "", itemPrice: "" });
+            onNext();
+          }}
+          className="text-sm text-[rgb(var(--color-muted))] underline hover:text-[rgb(var(--color-text))]"
+        >
+          {labels.skip}
+        </button>
+      </div>
     </>
   );
 }

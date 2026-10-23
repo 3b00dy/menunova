@@ -53,6 +53,31 @@ export const DEFAULT_THEME_CONFIG: ThemeConfig = {
   },
 };
 
+/**
+ * Coerce a stored theme into a complete {@link ThemeConfig}: every section is the
+ * default overlaid with whatever valid fields were saved. The backend theme
+ * endpoint is a passthrough JSON store, so a partial, legacy or empty (`{}`)
+ * payload must never reach the renderers — a missing `components` section used
+ * to crash the public menu (`theme.components.layout` of undefined).
+ */
+export function normalizeThemeConfig(raw: unknown): ThemeConfig {
+  const stored = (raw && typeof raw === "object" ? raw : {}) as Record<string, unknown>;
+  const section = <K extends keyof ThemeConfig>(key: K): ThemeConfig[K] => {
+    const value = stored[key];
+    return {
+      ...DEFAULT_THEME_CONFIG[key],
+      ...(value && typeof value === "object" && !Array.isArray(value) ? value : {}),
+    } as ThemeConfig[K];
+  };
+  return {
+    brandAssets: section("brandAssets"),
+    languages: section("languages"),
+    brandColors: section("brandColors"),
+    typography: section("typography"),
+    components: section("components"),
+  };
+}
+
 /** Semantic tokens → concrete CSS values consumed by the menu renderer. */
 export const RADIUS_VALUES: Record<BorderRadiusToken, string> = {
   none: "0px",

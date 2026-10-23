@@ -53,9 +53,17 @@ export function ThemeBuilder({
     }));
   };
 
+  // "Reset to theme" (US-BR-02 AC3): restore the default STYLE only — colours,
+  // fonts, components — like a preset does. The restaurant's own logo/cover
+  // (brandAssets) and language settings are kept, so Reset + Save never wipes them.
   const reset = () => {
     setSaved(false);
-    setConfig(DEFAULT_THEME_CONFIG);
+    setConfig((prev) => ({
+      ...prev,
+      brandColors: DEFAULT_THEME_CONFIG.brandColors,
+      typography: DEFAULT_THEME_CONFIG.typography,
+      components: DEFAULT_THEME_CONFIG.components,
+    }));
   };
 
   const save = () =>

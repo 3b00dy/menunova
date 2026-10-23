@@ -4,6 +4,7 @@ import {
   FolderTree,
   UtensilsCrossed,
   CircleCheck,
+  Circle,
   Palette,
   Languages,
   ExternalLink,
@@ -36,6 +37,7 @@ export function DashboardOverview({
   supportedLanguages,
   defaultLanguage,
   stats,
+  logoUrl,
   dict,
   locale,
   caps,
@@ -44,6 +46,8 @@ export function DashboardOverview({
   supportedLanguages: string[];
   defaultLanguage: string;
   stats: MenuStats;
+  /** The logo guests see (theme logo, else the restaurant record's). */
+  logoUrl?: string;
   dict: Dictionary["dashboard"];
   locale: Locale;
   caps: DashboardCapabilities;
@@ -67,6 +71,28 @@ export function DashboardOverview({
           </div>
         }
       />
+
+      {caps.menuManage && (
+        <SetupChecklist
+          labels={o.setup}
+          steps={[
+            { label: o.setup.addCategory, done: stats.categoryCount > 0, href: routes.dashboardMenu(locale) },
+            { label: o.setup.addItem, done: stats.itemCount > 0, href: routes.dashboardMenu(locale) },
+            ...(caps.theme
+              ? [{ label: o.setup.addLogo, done: !!logoUrl, href: routes.dashboardTheme(locale) }]
+              : []),
+            ...(supportedLanguages.length > 1
+              ? [
+                  {
+                    label: o.setup.translate,
+                    done: stats.itemCount > 0 && stats.coverage.overallPct === 100,
+                    href: routes.dashboardMenu(locale),
+                  },
+                ]
+              : []),
+          ]}
+        />
+      )}
 
       {/* KPI tiles */}
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-3">
@@ -149,6 +175,52 @@ export function DashboardOverview({
 }
 
 // ---------------------------------------------------------------------------
+
+/**
+ * "Finish setting up" — the resumable half of onboarding (BRD BR-LP-05 /
+ * US-LP-04 AC2): steps skipped in the wizard stay listed here, each linking to
+ * where it's done. Hidden once everything is complete.
+ */
+function SetupChecklist({
+  labels,
+  steps,
+}: {
+  labels: Dictionary["dashboard"]["overview"]["setup"];
+  steps: { label: string; done: boolean; href: string }[];
+}) {
+  const done = steps.filter((s) => s.done).length;
+  if (done === steps.length) return null;
+  return (
+    <Card>
+      <CardHeader className="flex items-center justify-between gap-3">
+        <span className="text-sm font-semibold text-[rgb(var(--color-text))]">{labels.title}</span>
+        <span className="text-xs text-[rgb(var(--color-muted))]">
+          {labels.progress.replace("{done}", String(done)).replace("{total}", String(steps.length))}
+        </span>
+      </CardHeader>
+      <CardBody className="flex flex-col gap-1 pt-0">
+        {steps.map((step) =>
+          step.done ? (
+            <div key={step.label} className="flex items-center gap-2.5 py-1.5 text-sm text-[rgb(var(--color-muted))]">
+              <CircleCheck className="h-4 w-4 shrink-0 text-emerald-600" />
+              <span className="line-through">{step.label}</span>
+            </div>
+          ) : (
+            <Link
+              key={step.label}
+              href={step.href}
+              className="group flex items-center gap-2.5 rounded-[var(--radius-active)] py-1.5 text-sm font-medium text-[rgb(var(--color-text))] hover:text-[rgb(var(--color-primary))]"
+            >
+              <Circle className="h-4 w-4 shrink-0 text-[rgb(var(--color-muted))]" />
+              <span className="flex-1">{step.label}</span>
+              <ArrowRight className="h-4 w-4 shrink-0 opacity-0 transition-opacity group-hover:opacity-100 rtl:rotate-180" />
+            </Link>
+          ),
+        )}
+      </CardBody>
+    </Card>
+  );
+}
 
 const TONE_CHIP: Record<string, string> = {
   primary: "bg-[rgb(var(--color-primary))]/10 text-[rgb(var(--color-primary))]",

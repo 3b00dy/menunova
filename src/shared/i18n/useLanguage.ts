@@ -2,9 +2,18 @@
 
 import { usePathname, useRouter } from "next/navigation";
 import { defaultLocale, isLocale } from "@/shared/i18n/config";
-import { uiLocaleFor } from "@/shared/i18n/languages";
+import {
+  LANGUAGE_COOKIE_MAX_AGE,
+  MENU_LANGUAGE_COOKIE,
+  uiLocaleFor,
+} from "@/shared/i18n/languages";
 
 const LOCALE_COOKIE = "mn_locale";
+
+/** Persist a language-preference cookie for a year. */
+function setPrefCookie(name: string, value: string) {
+  document.cookie = `${name}=${encodeURIComponent(value)};path=/;max-age=${LANGUAGE_COOKIE_MAX_AGE}`;
+}
 
 /**
  * Next-native replacement for the source app's language context. Reads the
@@ -24,7 +33,7 @@ export function useLanguage() {
     const parts = pathname.split("/");
     if (isLocale(parts[1])) parts[1] = ui;
     else parts.splice(1, 0, ui);
-    document.cookie = `${LOCALE_COOKIE}=${ui};path=/`;
+    setPrefCookie(LOCALE_COOKIE, ui);
     router.push((parts.join("/") || `/${ui}`) + query);
   };
 
@@ -36,8 +45,13 @@ export function useLanguage() {
    * straight to the route; other content languages (e.g. `ckb`) keep the route on
    * their companion UI locale and select the content via `?lang=`.
    */
-  const setMenuLanguage = (code: string) =>
+  const setMenuLanguage = (code: string) => {
+    setPrefCookie(MENU_LANGUAGE_COOKIE, code);
     navigate(uiLocaleFor(code), isLocale(code) ? "" : `?lang=${encodeURIComponent(code)}`);
+  };
 
-  return { lang, setLang, setMenuLanguage };
+  /** Remember a menu language without navigating (it's already showing). */
+  const rememberMenuLanguage = (code: string) => setPrefCookie(MENU_LANGUAGE_COOKIE, code);
+
+  return { lang, setLang, setMenuLanguage, rememberMenuLanguage };
 }

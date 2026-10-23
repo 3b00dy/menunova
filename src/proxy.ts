@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { locales, defaultLocale, isLocale } from "@/shared/i18n/config";
+import { LANGUAGE_COOKIE_MAX_AGE } from "@/shared/i18n/languages";
 import { env } from "@/shared/config/env";
 
 // Session cookie name (kept in sync with `@/shared/auth/getServerSession`; not
@@ -43,7 +44,7 @@ export function proxy(request: NextRequest): NextResponse {
     const url = request.nextUrl.clone();
     url.pathname = `/${locale}${pathname === "/" ? "" : pathname}`;
     const response = NextResponse.redirect(url);
-    response.cookies.set(LOCALE_COOKIE, locale, { path: "/" });
+    response.cookies.set(LOCALE_COOKIE, locale, { path: "/", maxAge: LANGUAGE_COOKIE_MAX_AGE });
     return response;
   }
 
