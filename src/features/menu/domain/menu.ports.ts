@@ -17,7 +17,8 @@ import type {
  * This is what lets the data source be swapped freely.
  */
 export interface MenuRepository {
-  getByRestaurantSlug(slug: string): Promise<Menu | null>;
+  /** `fresh` bypasses caches — for writes that must see the latest menu (e.g. import). */
+  getByRestaurantSlug(slug: string, options?: { fresh?: boolean }): Promise<Menu | null>;
 
   // --- Item CRUD ---
   createItem(slug: string, draft: MenuItemDraft, token: string): Promise<MenuItem>;

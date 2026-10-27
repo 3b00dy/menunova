@@ -20,11 +20,11 @@ export const API_ENDPOINTS = {
     /** POST — email/password → { token, user }. Live on the backend. */
     login: "/auth/login",
     /**
-     * POST — create owner account → { token, user }. The backend has no signup
-     * endpoint; this is served by the Next BFF at `POST /api/auth/register`
-     * (see src/app/api/auth/register/route.ts).
+     * POST — public self-serve signup: creates the owner account AND their
+     * restaurant (`{ name, email, password, restaurant_name, slug, plan }`) →
+     * `{ token, user }`. `409` = email or slug taken. Live.
      */
-    register: "/api/auth/register",
+    register: "/auth/register",
     /** GET — verify bearer token → current user DTO (bare, no wrapper). Live. */
     me: "/auth/me",
     /** POST — invalidate the current token. Live. */

@@ -61,15 +61,16 @@ export class HttpRestaurantRepository implements RestaurantRepository {
     return dto ? toRestaurant(dto) : null;
   }
 
-  async getById(id: string): Promise<Restaurant | null> {
+  async getById(id: string, token?: string): Promise<Restaurant | null> {
     const dto = await httpClient.get<RestaurantDto | null>(
       API_ENDPOINTS.restaurants.byId(id),
+      { token },
     );
     return dto ? toRestaurant(dto) : null;
   }
 
-  async list(): Promise<Restaurant[]> {
-    const dtos = await httpClient.get<RestaurantDto[]>(API_ENDPOINTS.restaurants.list);
+  async list(token: string): Promise<Restaurant[]> {
+    const dtos = await httpClient.get<RestaurantDto[]>(API_ENDPOINTS.restaurants.list, { token });
     return dtos.map(toRestaurant);
   }
 

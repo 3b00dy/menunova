@@ -99,6 +99,7 @@ export function ThemeBuilder({
             applyPreset={applyPreset}
             tb={tb}
             locale={locale}
+            slug={slug}
           />
         </div>
         <div className="min-w-0 self-start lg:sticky lg:top-6">

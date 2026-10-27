@@ -10,6 +10,7 @@ import { restaurantRepository } from "@/features/restaurant/infrastructure/resta
  * (`registerOwner`), never from user-facing dashboard actions.
  */
 export async function provisionRestaurant(draft: RestaurantDraft): Promise<Restaurant> {
-  // Token is unused by the mock; the live backend provisions inside /auth/register.
+  // Mock-only in practice: live signup creates the restaurant inside
+  // `POST /auth/register`. The token is unused by the mock.
   return restaurantRepository.create(draft, "system");
 }

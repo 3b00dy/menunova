@@ -15,6 +15,7 @@ export type { NavItem } from "@/shared/ui/Sidebar";
 export { Modal } from "@/shared/ui/Modal";
 export { Sheet } from "@/shared/ui/Sheet";
 export { Switch } from "@/shared/ui/Switch";
+export { ImageUpload } from "@/shared/ui/ImageUpload";
 export { EmptyState } from "@/shared/ui/EmptyState";
 export { Spinner } from "@/shared/ui/Spinner";
 export { QueryBoundary, LoadingState, ErrorState } from "@/shared/ui/QueryBoundary";

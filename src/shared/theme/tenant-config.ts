@@ -5,6 +5,12 @@
  * another feature for it.
  */
 
+import {
+  DEFAULT_RESTAURANT_INFO,
+  normalizeRestaurantInfo,
+  type RestaurantInfo,
+} from "@/shared/theme/restaurant-info";
+
 /**
  * Public-menu layout mode:
  *  - "categories": category cards only (tap a category to view its items)
@@ -32,6 +38,12 @@ export interface ThemeConfig {
     shadow: ShadowToken;
     buttonStyle: ButtonStyleToken;
   };
+  /**
+   * Restaurant info (address, hours, phone, socials) — stored here until the
+   * backend has real profile fields. Edited on the Restaurant settings page,
+   * not in the Theme Builder.
+   */
+  info: RestaurantInfo;
 }
 
 /** Sensible "Modern Minimalist" default (matches the API's default payload). */
@@ -51,6 +63,7 @@ export const DEFAULT_THEME_CONFIG: ThemeConfig = {
     shadow: "md",
     buttonStyle: "solid",
   },
+  info: DEFAULT_RESTAURANT_INFO,
 };
 
 /**
@@ -75,6 +88,7 @@ export function normalizeThemeConfig(raw: unknown): ThemeConfig {
     brandColors: section("brandColors"),
     typography: section("typography"),
     components: section("components"),
+    info: normalizeRestaurantInfo(stored.info),
   };
 }
 

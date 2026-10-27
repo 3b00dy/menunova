@@ -29,6 +29,13 @@ export const env = {
    * dev). Set `MENUNOVA_DATA_MODE=live` to talk to the real API.
    */
   dataMode: process.env.MENUNOVA_DATA_MODE === "live" ? "live" : "mock",
+  /**
+   * Public origin of this frontend (e.g. `https://menunova.app`) — what printed
+   * QR codes point to. Set it in production; otherwise derived per request.
+   */
+  siteUrl: process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") || undefined,
+  /** Where restaurants send upgrade requests (no online payment yet). Optional. */
+  supportEmail: process.env.NEXT_PUBLIC_SUPPORT_EMAIL || undefined,
 } as const;
 
 export type Env = typeof env;

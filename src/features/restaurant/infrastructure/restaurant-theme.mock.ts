@@ -14,6 +14,7 @@ import type { RestaurantThemeRepository } from "@/features/restaurant/domain/res
 const theme = (over: Partial<ThemeConfig> & Pick<ThemeConfig, "brandColors" | "typography" | "components">): ThemeConfig => ({
   brandAssets: { logoUrl: "", coverImageUrl: "" },
   languages: { default: "en", supported: ["en", "ar"] },
+  info: DEFAULT_THEME_CONFIG.info,
   ...over,
 });
 

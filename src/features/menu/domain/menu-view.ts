@@ -4,6 +4,8 @@
  * every field beyond name+price is optional and omitted cleanly when absent.
  */
 
+import type { DayHours } from "@/shared/theme/restaurant-info";
+
 export interface MenuAddon {
   name: string;
   price: string;
@@ -47,7 +49,11 @@ export interface MenuRestaurant {
   hoursClose: string;
   phone?: string;
   address?: string;
+  /** Directions link for the address (else a maps search is used). */
+  mapUrl?: string;
   socials?: MenuSocial[];
+  /** Real weekly hours (7 entries, `Date.getDay()` order) — drives open/closed. */
+  weeklyHours?: DayHours[];
 }
 
 export interface MenuView {
@@ -60,6 +66,8 @@ export interface MenuView {
 export interface MenuViewLabels {
   categories: string;
   openNow: string;
+  closedNow: string;
+  closedToday: string;
   soldOut: string;
   calories: string;
   prepTime: string;

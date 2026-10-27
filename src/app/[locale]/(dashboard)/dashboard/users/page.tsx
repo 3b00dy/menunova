@@ -22,7 +22,7 @@ export default async function UsersPage({
 
   const t = await getDictionary(locale);
   // Restaurants power the tenant picker/labels when a user is an owner/staff.
-  const [users, restaurants] = await Promise.all([listUsers(), listRestaurants()]);
+  const [users, restaurants] = await Promise.all([listUsers(), listRestaurants(session.token)]);
 
   return (
     <section className="flex flex-col gap-2">

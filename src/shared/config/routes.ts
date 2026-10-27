@@ -14,6 +14,7 @@ export const routes = {
 
   dashboard: (locale: Locale) => `/${locale}/dashboard`,
   dashboardMenu: (locale: Locale) => `/${locale}/dashboard/menu`,
+  dashboardQr: (locale: Locale) => `/${locale}/dashboard/qr`,
   dashboardTheme: (locale: Locale) => `/${locale}/dashboard/theme`,
   dashboardRestaurant: (locale: Locale) => `/${locale}/dashboard/restaurant`,
   dashboardStaff: (locale: Locale) => `/${locale}/dashboard/staff`,

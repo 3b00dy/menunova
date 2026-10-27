@@ -26,7 +26,7 @@ export default async function StaffPage({
   const t = await getDictionary(locale);
   const s = t.dashboard.staffManager;
   const restaurantId = session.user.restaurantId ?? "demo";
-  const staff = await listStaff(restaurantId);
+  const staff = await listStaff(restaurantId, session.token);
 
   return (
     <section className="flex flex-col gap-6">

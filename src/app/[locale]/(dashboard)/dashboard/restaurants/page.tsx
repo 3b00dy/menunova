@@ -20,7 +20,7 @@ export default async function RestaurantsPage({
   }
 
   const t = await getDictionary(locale);
-  const restaurants = await listRestaurants();
+  const restaurants = await listRestaurants(session.token);
 
   return (
     <section className="flex flex-col gap-2">

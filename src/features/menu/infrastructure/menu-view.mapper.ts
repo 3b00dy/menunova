@@ -1,7 +1,8 @@
 import { localize } from "@/shared/i18n/localized";
 import { formatMoney } from "@/shared/utils/formatMoney";
 import type { Menu } from "@/features/menu/domain/menu.entity";
-import type { MenuView, MenuViewItem } from "@/features/menu/domain/menu-view";
+import type { MenuSocial, MenuView, MenuViewItem } from "@/features/menu/domain/menu-view";
+import { socialUrl, type RestaurantInfo } from "@/shared/theme/restaurant-info";
 
 /**
  * Map a restaurant's editable {@link Menu} into the customer-facing
@@ -19,8 +20,10 @@ export function buildMenuView(args: {
   locale: string;
   /** Restaurant's default language — used when `locale` has no translation. */
   fallback?: string;
+  /** Public restaurant info (address, hours, phone, socials), if any. */
+  info?: RestaurantInfo;
 }): MenuView {
-  const { menu, restaurantName, locale, fallback } = args;
+  const { menu, restaurantName, locale, fallback, info } = args;
 
   const items: MenuViewItem[] = (menu?.items ?? []).map((item) => ({
     id: item.id,
@@ -42,8 +45,31 @@ export function buildMenuView(args: {
       imageUrl: items.find((i) => i.categoryId === category.id && i.imageUrl)?.imageUrl,
     }));
 
+  const socials: MenuSocial[] = info
+    ? (
+        [
+          ["instagram", "instagram", "Instagram"],
+          ["facebook", "facebook", "Facebook"],
+          ["tiktok", "tiktok", "TikTok"],
+          ["website", "other", "Website"],
+        ] as const
+      )
+        .map(([key, type, label]) => ({ type, label, href: socialUrl(key, info.socials[key]) }))
+        .filter((s) => s.href)
+    : [];
+
   return {
-    restaurant: { name: restaurantName, tagline: "", hoursOpen: "", hoursClose: "" },
+    restaurant: {
+      name: restaurantName,
+      tagline: info ? localize(info.tagline, locale, fallback) : "",
+      hoursOpen: "",
+      hoursClose: "",
+      phone: info?.phone || undefined,
+      address: (info && localize(info.address, locale, fallback)) || undefined,
+      mapUrl: info?.mapUrl || undefined,
+      socials: socials.length ? socials : undefined,
+      weeklyHours: info?.hours.length === 7 ? info.hours : undefined,
+    },
     categories,
     items,
   };

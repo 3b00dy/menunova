@@ -32,7 +32,7 @@ export default async function DashboardMenuPage({
 
   // Super admin: choose which tenant to manage (default: first restaurant).
   // Owner/staff: locked to their own restaurant.
-  const restaurants = isSuperAdmin ? await listRestaurants() : [];
+  const restaurants = isSuperAdmin && session ? await listRestaurants(session.token) : [];
   let slug: string | null;
   if (isSuperAdmin) {
     slug =

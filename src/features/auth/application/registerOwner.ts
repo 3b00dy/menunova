@@ -6,7 +6,7 @@ import { routes } from "@/shared/config/routes";
 import type { Locale } from "@/shared/i18n/config";
 import {
   getRestaurantBySlug,
-  provisionRestaurant,
+  provisionRestaurantBranding,
   provisionRestaurantLanguages,
   type RestaurantPlan,
 } from "@/features/restaurant";
@@ -26,14 +26,16 @@ function slugify(name: string): string {
 }
 
 /**
- * Self-serve onboarding: create the owner account, provision their restaurant
- * (name, slug, plan, branding) AND its language settings, log them in, and drop
- * them into their own dashboard. Returns an error code on failure (the wizard
- * maps it to a localized message and jumps back to the relevant step); on
- * success it redirects and never returns.
+ * Self-serve onboarding. `authRepository.register` creates the owner account AND
+ * their restaurant (live: one `POST /auth/register` call → a real, persistent
+ * account the owner can log back into). Then, with the owner's own token, it
+ * applies the wizard's extras — branding, language settings, optional first
+ * dish — logs them in and redirects to their dashboard.
  *
- * The owner's `restaurantId` is the restaurant's slug — this app scopes the
- * dashboard by slug (see the menu/staff pages).
+ * Returns an error code on failure (the wizard maps it to a localized message
+ * and jumps back to the relevant step); on success it redirects and never
+ * returns. Extras are best-effort: once the account exists, a failed extra must
+ * not fail signup — the owner finishes it from the dashboard checklist.
  */
 export async function registerOwner(input: {
   locale: Locale;
@@ -66,40 +68,37 @@ export async function registerOwner(input: {
     return { error: "required" };
   }
 
-  // Respect the owner's chosen slug — surface a conflict instead of mutating it.
+  // Fast, friendly check (the backend also rejects a taken slug with 409).
   if (await getRestaurantBySlug(slug)) {
     return { error: "slug_taken" };
   }
 
-  // Create the user first so a duplicate email fails BEFORE we provision a tenant.
   let session: Session;
   try {
-    session = await authRepository.register({ email, password: input.password, name, restaurantId: slug });
+    session = await authRepository.register({
+      email,
+      password: input.password,
+      name,
+      restaurant: { name: restaurantName, slug, plan: input.restaurant.plan },
+    });
   } catch (e) {
-    return { error: e instanceof Error ? e.message : "register_failed" };
+    return { error: e instanceof Error ? e.message : "generic" };
   }
 
-  await provisionRestaurant({
-    name: restaurantName,
+  const token = session.token;
+  await provisionRestaurantBranding(
     slug,
-    ownerEmail: email,
-    plan: input.restaurant.plan,
-    status: "trial",
-    logoUrl: input.restaurant.logoUrl?.trim() || undefined,
-    brandColor: input.restaurant.brandColor?.trim() || undefined,
-  });
+    {
+      logoUrl: input.restaurant.logoUrl?.trim() || undefined,
+      brandColor: input.restaurant.brandColor?.trim() || undefined,
+    },
+    token,
+  ).catch((e) => console.error("Signup: branding failed", e));
 
-  // Persist the restaurant's language settings (the new owner's token authorizes
-  // the live PUT; the mock ignores it).
-  await provisionRestaurantLanguages(
-    slug,
-    { defaultLanguage, supportedLanguages },
-    session.token,
+  await provisionRestaurantLanguages(slug, { defaultLanguage, supportedLanguages }, token).catch((e) =>
+    console.error("Signup: language settings failed", e),
   );
 
-  // Seed the first category/item. Best-effort: the account and restaurant
-  // already exist, so a failure here must not fail signup — the owner can add
-  // them from the dashboard's setup checklist.
   const categoryName = input.firstMenu?.categoryName.trim();
   if (categoryName) {
     const item = input.firstMenu?.item;
@@ -110,10 +109,10 @@ export async function registerOwner(input: {
         categoryName,
         item: item?.name.trim() && item.priceMinor >= 0 ? { ...item, name: item.name.trim() } : undefined,
       },
-      session.token,
-    ).catch(() => undefined);
+      token,
+    ).catch((e) => console.error("Signup: first menu failed", e));
   }
 
-  await setServerSession(session.token);
+  await setServerSession(token);
   redirect(routes.dashboard(input.locale));
 }

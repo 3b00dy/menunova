@@ -4,11 +4,18 @@ import { getDictionary } from "@/shared/i18n/getDictionary";
 import { routes } from "@/shared/config/routes";
 import { EmptyState, PageHeader } from "@/shared/ui";
 import { can, getSession } from "@/features/auth";
-import { getRestaurantSettings, listRestaurants, LanguageSettingsForm } from "@/features/restaurant";
+import {
+  getRestaurantSettings,
+  getRestaurantTheme,
+  listRestaurants,
+  LanguageSettingsForm,
+  RestaurantInfoForm,
+} from "@/features/restaurant";
 import { RestaurantScopePicker } from "@/app/[locale]/(dashboard)/_components/RestaurantScopePicker";
 
 /**
- * Restaurant settings — the menu language configuration. Requires
+ * Restaurant settings — public restaurant info (address, hours, phone, socials)
+ * and the menu language configuration. Requires
  * `settings:manage`. An **owner** manages their own restaurant; a **super
  * admin** (who owns no single restaurant) picks any tenant via
  * `?restaurant=<slug>` and controls its settings.
@@ -27,7 +34,7 @@ export default async function RestaurantSettingsPage({
   }
 
   const isSuperAdmin = can(session.user, "restaurants:manage");
-  const restaurants = isSuperAdmin ? await listRestaurants() : [];
+  const restaurants = isSuperAdmin ? await listRestaurants(session.token) : [];
 
   let slug: string | null;
   if (isSuperAdmin) {
@@ -45,14 +52,12 @@ export default async function RestaurantSettingsPage({
     );
   }
 
-  const settings = await getRestaurantSettings(slug);
+  const [settings, theme] = await Promise.all([getRestaurantSettings(slug), getRestaurantTheme(slug)]);
+  const info = t.dashboard.restaurantInfo;
 
   return (
     <section className="flex flex-col gap-4">
-      <PageHeader
-        title={t.dashboard.languageSettings.title}
-        description={t.dashboard.languageSettings.subtitle}
-      />
+      <PageHeader title={t.dashboard.restaurant} description={info.pageSubtitle} />
       {isSuperAdmin && (
         <RestaurantScopePicker
           restaurants={restaurants.map((r) => ({ slug: r.slug, name: r.name }))}
@@ -61,7 +66,29 @@ export default async function RestaurantSettingsPage({
           label={t.dashboard.menuAdmin.restaurant}
         />
       )}
+      <SectionTitle title={info.title} description={info.subtitle} />
+      <RestaurantInfoForm
+        key={`info-${slug}`}
+        slug={slug}
+        info={theme.info}
+        languages={settings.supportedLanguages}
+        defaultLanguage={settings.defaultLanguage}
+      />
+
+      <SectionTitle
+        title={t.dashboard.languageSettings.title}
+        description={t.dashboard.languageSettings.subtitle}
+      />
       <LanguageSettingsForm key={slug} settings={settings} slug={slug} />
     </section>
+  );
+}
+
+function SectionTitle({ title, description }: { title: string; description: string }) {
+  return (
+    <div className="mt-2 flex flex-col gap-0.5">
+      <h2 className="text-lg font-semibold text-[rgb(var(--color-text))]">{title}</h2>
+      <p className="text-sm text-[rgb(var(--color-muted))]">{description}</p>
+    </div>
   );
 }

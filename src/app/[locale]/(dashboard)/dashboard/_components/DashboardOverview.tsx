@@ -11,12 +11,18 @@ import {
   Building2,
   ArrowRight,
   Users,
+  Clock3,
+  Coins,
+  ArrowLeftRight,
+  QrCode,
 } from "lucide-react";
 import type { Locale } from "@/shared/i18n/config";
 import type { Dictionary } from "@/shared/i18n/getDictionary";
 import { localize } from "@/shared/i18n/localized";
 import { SUPPORTED_LANGUAGES } from "@/shared/i18n/languages";
 import { routes } from "@/shared/config/routes";
+import { formatMoney } from "@/shared/utils/formatMoney";
+import { trialInfo } from "@/features/billing";
 import { Badge, Card, CardBody, CardHeader, PageHeader } from "@/shared/ui";
 import type { MenuStats } from "@/features/menu";
 import { statusTone, type Restaurant } from "@/features/restaurant";
@@ -53,6 +59,8 @@ export function DashboardOverview({
   caps: DashboardCapabilities;
 }) {
   const o = dict.overview;
+  // Trial countdown (US-LP-03 AC1) — display-only until the backend enforces it.
+  const trial = restaurant.status === "trial" ? trialInfo(restaurant.createdAt, new Date()) : null;
   const createdAt = restaurant.createdAt
     ? new Intl.DateTimeFormat(locale, { dateStyle: "medium" }).format(new Date(restaurant.createdAt))
     : null;
@@ -71,6 +79,26 @@ export function DashboardOverview({
           </div>
         }
       />
+
+      {trial && caps.settings && (
+        <Link
+          href={routes.dashboardBilling(locale)}
+          className={`flex items-center gap-2 rounded-[var(--radius-active)] px-4 py-3 text-sm font-medium ${
+            trial.expired ? "bg-red-50 text-red-700" : "bg-amber-50 text-amber-800"
+          }`}
+        >
+          <Clock3 className="h-4 w-4 shrink-0" />
+          <span className="flex-1">
+            {trial.expired
+              ? dict.billingPage.trialExpired
+              : dict.billingPage.trialDaysLeft.replace("{days}", String(trial.daysLeft))}
+          </span>
+          <span className="inline-flex items-center gap-1 underline">
+            {dict.billingPage.viewPlans}
+            <ArrowRight className="h-3.5 w-3.5 rtl:rotate-180" />
+          </span>
+        </Link>
+      )}
 
       {caps.menuManage && (
         <SetupChecklist
@@ -113,7 +141,73 @@ export function DashboardOverview({
         /> */}
       </div>
 
-
+      {/* Menu insights — derived from the restaurant's own menu. Guest traffic
+          (scans, views, adds) needs backend event tracking — see backend-requests.md. */}
+      <div className="grid gap-4 lg:grid-cols-3">
+        <Card>
+          <CardHeader className="text-sm font-semibold text-[rgb(var(--color-text))]">
+            {o.sections.itemsByCategory}
+          </CardHeader>
+          <CardBody className="pt-0">
+            <CategoryBars
+              items={stats.itemsPerCategory}
+              locale={locale}
+              defaultLanguage={defaultLanguage}
+              emptyLabel={o.emptyMenu}
+            />
+          </CardBody>
+        </Card>
+        <Card>
+          <CardHeader className="text-sm font-semibold text-[rgb(var(--color-text))]">
+            {o.sections.availability}
+          </CardHeader>
+          <CardBody className="flex flex-col gap-4 pt-0">
+            <AvailabilityBar
+              available={stats.availableCount}
+              soldOut={stats.unavailableCount}
+              total={stats.itemCount}
+              labels={o}
+            />
+            {stats.price && (
+              <div className="flex flex-col gap-2 border-t border-[rgb(var(--color-border))] pt-3">
+                <MiniRow
+                  icon={Coins}
+                  label={o.pricing.average}
+                  value={formatMoney(
+                    { amountMinor: stats.price.averageMinor, currency: stats.price.currency },
+                    locale,
+                  )}
+                />
+                <MiniRow
+                  icon={ArrowLeftRight}
+                  label={o.pricing.range}
+                  value={`${formatMoney(
+                    { amountMinor: stats.price.minMinor, currency: stats.price.currency },
+                    locale,
+                  )} – ${formatMoney(
+                    { amountMinor: stats.price.maxMinor, currency: stats.price.currency },
+                    locale,
+                  )}`}
+                />
+              </div>
+            )}
+          </CardBody>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-col gap-0.5">
+            <span className="text-sm font-semibold text-[rgb(var(--color-text))]">
+              {o.sections.completeness}
+            </span>
+            <span className="text-xs text-[rgb(var(--color-muted))]">{o.completenessHint}</span>
+          </CardHeader>
+          <CardBody className="flex flex-col gap-3 pt-0">
+            <Meter label={o.overall} pct={stats.coverage.overallPct} emphasis />
+            {stats.coverage.perLanguage.map((l) => (
+              <Meter key={l.locale} label={langName(l.locale)} pct={l.pct} />
+            ))}
+          </CardBody>
+        </Card>
+      </div>
 
       {/* Menu completeness + account */}
       <div className="grid gap-4 lg:grid-cols-3">
@@ -157,6 +251,9 @@ export function DashboardOverview({
           )}
           {caps.settings && (
             <QuickAction href={routes.dashboardRestaurant(locale)} icon={Languages} label={o.actions.languages} />
+          )}
+          {caps.settings && (
+            <QuickAction href={routes.dashboardQr(locale)} icon={QrCode} label={dict.qr.title} />
           )}
           {caps.staff && (
             <QuickAction href={routes.dashboardStaff(locale)} icon={Users} label={o.actions.manageStaff} />

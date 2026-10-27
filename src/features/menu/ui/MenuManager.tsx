@@ -12,9 +12,11 @@ import {
   X,
   SearchX,
   GripVertical,
+  ChevronDown,
   ArrowUp,
   ArrowDown,
   ListOrdered,
+  FileUp,
 } from "lucide-react";
 import { useI18n } from "@/shared/i18n/I18nProvider";
 import { SUPPORTED_LANGUAGES } from "@/shared/i18n/languages";
@@ -28,6 +30,7 @@ import {
   CardHeader,
   EmptyState,
   Field,
+  ImageUpload,
   Input,
   Modal,
   Switch,
@@ -49,12 +52,22 @@ import {
   deleteCategory,
   updateCategory,
 } from "@/features/menu/application/category-actions";
+import { BulkImport } from "@/features/menu/ui/BulkImport";
 
 type Dialog =
   | { type: "category"; editing: Category | null }
-  | { type: "item"; editing: MenuItem | null; categoryId: string }
+  | {
+      type: "item";
+      editing: MenuItem | null;
+      categoryId: string;
+      /** Last item saved via "Save & add another" (shown as a confirmation). */
+      added?: string;
+      /** Bumped per "add another" so the form remounts empty. */
+      nonce?: number;
+    }
   | { type: "delete"; kind: "item" | "category"; id: string; name: string }
   | { type: "reorder" }
+  | { type: "import" }
   | null;
 
 const langName = (code: string) => SUPPORTED_LANGUAGES[code]?.name ?? code.toUpperCase();
@@ -114,6 +127,15 @@ export function MenuManager({
     });
   }
 
+  /** Like {@link run}, but opens `next` instead of closing ("Save & add another"). */
+  function runThenNext(action: () => Promise<unknown>, next: Dialog) {
+    startTransition(async () => {
+      await action();
+      setDialog(next);
+      router.refresh();
+    });
+  }
+
   // Filter by the active category chip and the search query. Search matches text
   // in ANY language so an Arabic or English keyword both find the item. During a
   // search, categories with no matches are hidden to focus results.
@@ -156,6 +178,10 @@ export function MenuManager({
         </div>
         {canManage && (
           <div className="flex flex-wrap items-center gap-2">
+            <Button variant="outline" onClick={() => setDialog({ type: "import" })}>
+              <FileUp className="h-4 w-4" />
+              {m.import.button}
+            </Button>
             {categories.length > 1 && (
               <Button variant="outline" onClick={() => setDialog({ type: "reorder" })}>
                 <ListOrdered className="h-4 w-4" />
@@ -177,10 +203,16 @@ export function MenuManager({
           description={canManage ? m.noCategoriesHint : undefined}
           action={
             canManage ? (
-              <Button onClick={() => setDialog({ type: "category", editing: null })}>
-                <Plus className="h-4 w-4" />
-                {m.addCategory}
-              </Button>
+              <div className="flex flex-wrap justify-center gap-2">
+                <Button onClick={() => setDialog({ type: "category", editing: null })}>
+                  <Plus className="h-4 w-4" />
+                  {m.addCategory}
+                </Button>
+                <Button variant="outline" onClick={() => setDialog({ type: "import" })}>
+                  <FileUp className="h-4 w-4" />
+                  {m.import.button}
+                </Button>
+              </div>
             ) : undefined
           }
         />
@@ -413,6 +445,7 @@ export function MenuManager({
           labels={m}
           editing={dialog.editing}
           languages={languages}
+          defaultLanguage={defaultLanguage}
           pending={pending}
           onClose={() => setDialog(null)}
           onSubmit={(name) =>
@@ -427,6 +460,7 @@ export function MenuManager({
 
       {dialog?.type === "item" && (
         <ItemForm
+          key={dialog.nonce ?? 0}
           labels={m}
           editing={dialog.editing}
           categories={categories}
@@ -434,15 +468,37 @@ export function MenuManager({
           defaultLanguage={defaultLanguage}
           defaultCategoryId={dialog.categoryId}
           defaultCurrency={defaultCurrency}
+          slug={slug}
+          added={dialog.added}
           pending={pending}
           onClose={() => setDialog(null)}
-          onSubmit={(draft) =>
-            run(() =>
-              dialog.editing
-                ? updateMenuItem(slug, dialog.editing.id, draft)
-                : createMenuItem(slug, draft),
-            )
-          }
+          onSubmit={(draft, mode) => {
+            if (dialog.editing) {
+              run(() => updateMenuItem(slug, dialog.editing!.id, draft));
+            } else if (mode === "next") {
+              runThenNext(() => createMenuItem(slug, draft), {
+                type: "item",
+                editing: null,
+                categoryId: draft.categoryId,
+                added: localize(draft.name, defaultLanguage, defaultLanguage),
+                nonce: (dialog.nonce ?? 0) + 1,
+              });
+            } else {
+              run(() => createMenuItem(slug, draft));
+            }
+          }}
+        />
+      )}
+
+      {dialog?.type === "import" && (
+        <BulkImport
+          slug={slug}
+          languages={languages}
+          defaultLanguage={defaultLanguage}
+          currency={defaultCurrency}
+          categories={categories}
+          onClose={() => setDialog(null)}
+          onImported={() => router.refresh()}
         />
       )}
 
@@ -683,10 +739,20 @@ function LangBadge({ code }: { code: string }) {
   );
 }
 
+/** Default language first, then the other enabled languages. */
+function orderLanguages(languages: string[], defaultLanguage: string): string[] {
+  return [defaultLanguage, ...languages.filter((l) => l !== defaultLanguage)];
+}
+
+/**
+ * Category form. Only the default-language name is required (BRD US-RA-01
+ * AC1); other languages are optional and flagged as missing in the editor.
+ */
 function CategoryForm({
   labels: m,
   editing,
   languages,
+  defaultLanguage,
   pending,
   onClose,
   onSubmit,
@@ -694,14 +760,16 @@ function CategoryForm({
   labels: Labels;
   editing: Category | null;
   languages: string[];
+  defaultLanguage: string;
   pending: boolean;
   onClose: () => void;
   onSubmit: (name: LocalizedText) => void;
 }) {
+  const ordered = orderLanguages(languages, defaultLanguage);
   const [names, setNames] = useState<Record<string, string>>(() =>
-    Object.fromEntries(languages.map((l) => [l, editing?.name[l] ?? ""])),
+    Object.fromEntries(ordered.map((l) => [l, editing?.name[l] ?? ""])),
   );
-  const valid = languages.every((l) => names[l]?.trim());
+  const valid = Boolean(names[defaultLanguage]?.trim());
 
   return (
     <Modal
@@ -713,29 +781,58 @@ function CategoryForm({
           <Button variant="ghost" onClick={onClose} disabled={pending}>
             {m.cancel}
           </Button>
-          <Button disabled={!valid || pending} onClick={() => onSubmit(toLocalizedText(names))}>
+          <Button type="submit" form="category-form" disabled={!valid || pending}>
             {editing ? m.save : m.create}
           </Button>
         </>
       }
     >
-      <div className="flex flex-col gap-4">
-        {languages.map((lang, idx) => (
-          <Field key={lang} label={`${m.categoryName} · ${langName(lang)}`}>
+      <form
+        id="category-form"
+        className="flex flex-col gap-4"
+        onSubmit={(e) => {
+          e.preventDefault();
+          if (valid && !pending) onSubmit(toLocalizedText(names));
+        }}
+      >
+        {ordered.map((lang, idx) => (
+          <Field
+            key={lang}
+            label={
+              ordered.length > 1
+                ? `${m.categoryName} · ${langName(lang)}${idx > 0 ? ` (${m.optional})` : ""}`
+                : m.categoryName
+            }
+          >
             <Input
               autoFocus={idx === 0}
               dir={langDir(lang)}
               value={names[lang] ?? ""}
               onChange={(e) => setNames((s) => ({ ...s, [lang]: e.target.value }))}
-              placeholder={m.categoryNamePlaceholder}
+              placeholder={idx === 0 ? m.categoryNamePlaceholder : undefined}
             />
           </Field>
         ))}
-      </div>
+      </form>
     </Modal>
   );
 }
 
+export interface ItemDraftInput {
+  categoryId: string;
+  name: LocalizedText;
+  description: LocalizedText;
+  price: { amountMinor: number; currency: string };
+  available: boolean;
+  imageUrl?: string;
+}
+
+/**
+ * Item form, ordered for speed: name → price → category → photo → description,
+ * with other languages in an optional "Translations" section (only the default
+ * language is required — BRD US-RA-01 AC1). Enter submits. When adding, "Save &
+ * add another" keeps the dialog open on the same category for fast entry.
+ */
 function ItemForm({
   labels: m,
   editing,
@@ -744,6 +841,8 @@ function ItemForm({
   defaultLanguage,
   defaultCategoryId,
   defaultCurrency,
+  slug,
+  added,
   pending,
   onClose,
   onSubmit,
@@ -755,22 +854,21 @@ function ItemForm({
   defaultLanguage: string;
   defaultCategoryId: string;
   defaultCurrency: string;
+  /** Restaurant slug — groups uploaded photos per restaurant. */
+  slug: string;
+  /** Name of the item just saved via "Save & add another" (confirmation line). */
+  added?: string;
   pending: boolean;
   onClose: () => void;
-  onSubmit: (draft: {
-    categoryId: string;
-    name: LocalizedText;
-    description: LocalizedText;
-    price: { amountMinor: number; currency: string };
-    available: boolean;
-    imageUrl?: string;
-  }) => void;
+  onSubmit: (draft: ItemDraftInput, mode: "close" | "next") => void;
 }) {
+  const ordered = orderLanguages(languages, defaultLanguage);
+  const others = ordered.slice(1);
   const [names, setNames] = useState<Record<string, string>>(() =>
-    Object.fromEntries(languages.map((l) => [l, editing?.name[l] ?? ""])),
+    Object.fromEntries(ordered.map((l) => [l, editing?.name[l] ?? ""])),
   );
   const [descriptions, setDescriptions] = useState<Record<string, string>>(() =>
-    Object.fromEntries(languages.map((l) => [l, editing?.description[l] ?? ""])),
+    Object.fromEntries(ordered.map((l) => [l, editing?.description[l] ?? ""])),
   );
   const [priceMajor, setPriceMajor] = useState(
     editing ? (editing.price.amountMinor / 100).toString() : "",
@@ -778,24 +876,35 @@ function ItemForm({
   const [categoryId, setCategoryId] = useState(editing?.categoryId ?? defaultCategoryId);
   const [available, setAvailable] = useState(editing?.available ?? true);
   const [imageUrl, setImageUrl] = useState(editing?.imageUrl ?? "");
+  // Open translations when editing an item that already has some.
+  const [showTranslations, setShowTranslations] = useState(() =>
+    others.some((l) => editing?.name[l]?.trim() || editing?.description[l]?.trim()),
+  );
 
   const priceValue = Number(priceMajor);
   const validPrice = priceMajor.trim() !== "" && Number.isFinite(priceValue) && priceValue >= 0;
-  const validNames = languages.every((l) => names[l]?.trim());
-  const valid = validNames && validPrice && Boolean(categoryId);
+  const valid = Boolean(names[defaultLanguage]?.trim()) && validPrice && Boolean(categoryId);
   const currency = editing?.price.currency ?? defaultCurrency;
   const tr = (text: LocalizedText) => localize(text, defaultLanguage, defaultLanguage);
+  const missingCount = others.filter((l) => !names[l]?.trim()).length;
 
-  function submit() {
-    onSubmit({
-      categoryId,
-      name: toLocalizedText(names),
-      description: toLocalizedText(descriptions),
-      price: { amountMinor: Math.round(priceValue * 100), currency },
-      available,
-      imageUrl: imageUrl.trim() || undefined,
-    });
+  function submit(mode: "close" | "next") {
+    if (!valid || pending) return;
+    onSubmit(
+      {
+        categoryId,
+        name: toLocalizedText(names),
+        description: toLocalizedText(descriptions),
+        price: { amountMinor: Math.round(priceValue * 100), currency },
+        available,
+        imageUrl: imageUrl.trim() || undefined,
+      },
+      mode,
+    );
   }
+
+  const nameLabel =
+    ordered.length > 1 ? `${m.itemName} · ${langName(defaultLanguage)}` : m.itemName;
 
   return (
     <Modal
@@ -808,49 +917,52 @@ function ItemForm({
           <Button variant="ghost" onClick={onClose} disabled={pending}>
             {m.cancel}
           </Button>
-          <Button disabled={!valid || pending} onClick={submit}>
+          {!editing && (
+            <Button variant="outline" disabled={!valid || pending} onClick={() => submit("next")}>
+              {m.saveAndAddAnother}
+            </Button>
+          )}
+          <Button type="submit" form="item-form" disabled={!valid || pending}>
             {editing ? m.save : m.create}
           </Button>
         </>
       }
     >
-      <div className="flex flex-col gap-4">
-        {/* Per-language content blocks */}
-        {languages.map((lang, idx) => (
-          <div
-            key={lang}
-            className="flex flex-col gap-3 rounded-[var(--radius-active)] border border-[rgb(var(--color-border))] p-3"
-          >
-            <LangBadge code={lang} />
-            <Field label={m.itemName}>
-              <Input
-                autoFocus={idx === 0}
-                dir={langDir(lang)}
-                value={names[lang] ?? ""}
-                onChange={(e) => setNames((s) => ({ ...s, [lang]: e.target.value }))}
-                placeholder={m.itemNamePlaceholder}
-              />
-            </Field>
-            <Field label={m.description}>
-              <Textarea
-                dir={langDir(lang)}
-                value={descriptions[lang] ?? ""}
-                onChange={(e) => setDescriptions((s) => ({ ...s, [lang]: e.target.value }))}
-              />
-            </Field>
-          </div>
-        ))}
+      <form
+        id="item-form"
+        className="flex flex-col gap-4"
+        onSubmit={(e) => {
+          e.preventDefault();
+          submit("close");
+        }}
+      >
+        {added && (
+          <p className="rounded-[var(--radius-active)] bg-emerald-50 px-3 py-2 text-sm text-emerald-700">
+            {m.added.replace("{name}", added)}
+          </p>
+        )}
+
+        <Field label={nameLabel}>
+          <Input
+            autoFocus
+            dir={langDir(defaultLanguage)}
+            value={names[defaultLanguage] ?? ""}
+            onChange={(e) => setNames((s) => ({ ...s, [defaultLanguage]: e.target.value }))}
+            placeholder={m.itemNamePlaceholder}
+          />
+        </Field>
 
         <div className="grid grid-cols-2 gap-4">
           <Field label={`${m.price} (${currency})`}>
             <Input
               type="number"
               min="0"
-              step="0.01"
+              step="any"
               inputMode="decimal"
+              dir="ltr"
               value={priceMajor}
               onChange={(e) => setPriceMajor(e.target.value)}
-              placeholder="0.00"
+              placeholder="0"
             />
           </Field>
           <Field label={m.category}>
@@ -867,15 +979,78 @@ function ItemForm({
             </select>
           </Field>
         </div>
-        <Field label={m.imageUrl} hint={m.imageUrlHint}>
-          <Input
-            value={imageUrl}
-            onChange={(e) => setImageUrl(e.target.value)}
-            placeholder="https://…"
+
+        <ImageUpload
+          label={`${m.photo} (${m.optional})`}
+          value={imageUrl}
+          folder={`menunova/${slug}`}
+          onChange={setImageUrl}
+        />
+
+        <Field label={`${m.description} (${m.optional})`}>
+          <Textarea
+            dir={langDir(defaultLanguage)}
+            value={descriptions[defaultLanguage] ?? ""}
+            onChange={(e) =>
+              setDescriptions((s) => ({ ...s, [defaultLanguage]: e.target.value }))
+            }
           />
         </Field>
+
+        {others.length > 0 && (
+          <div className="rounded-[var(--radius-active)] border border-[rgb(var(--color-border))]">
+            <button
+              type="button"
+              onClick={() => setShowTranslations((v) => !v)}
+              aria-expanded={showTranslations}
+              className="flex w-full items-center justify-between gap-3 px-3 py-2.5 text-start text-sm font-medium text-[rgb(var(--color-text))]"
+            >
+              <span className="flex items-center gap-2">
+                {m.translations}
+                {missingCount > 0 && (
+                  <Badge tone="warning">
+                    {m.missingTranslation.replace(
+                      "{langs}",
+                      others.filter((l) => !names[l]?.trim()).map(langName).join(", "),
+                    )}
+                  </Badge>
+                )}
+              </span>
+              <ChevronDown
+                className={`h-4 w-4 shrink-0 transition-transform ${showTranslations ? "rotate-180" : ""}`}
+              />
+            </button>
+            {showTranslations && (
+              <div className="flex flex-col gap-4 border-t border-[rgb(var(--color-border))] p-3">
+                <p className="text-xs text-[rgb(var(--color-muted))]">
+                  {m.translationsHint.replace("{lang}", langName(defaultLanguage))}
+                </p>
+                {others.map((lang) => (
+                  <div key={lang} className="flex flex-col gap-3">
+                    <LangBadge code={lang} />
+                    <Input
+                      dir={langDir(lang)}
+                      aria-label={`${m.itemName} · ${langName(lang)}`}
+                      value={names[lang] ?? ""}
+                      onChange={(e) => setNames((s) => ({ ...s, [lang]: e.target.value }))}
+                      placeholder={m.itemName}
+                    />
+                    <Textarea
+                      dir={langDir(lang)}
+                      aria-label={`${m.description} · ${langName(lang)}`}
+                      value={descriptions[lang] ?? ""}
+                      onChange={(e) => setDescriptions((s) => ({ ...s, [lang]: e.target.value }))}
+                      placeholder={m.description}
+                    />
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
         <Switch checked={available} onChange={setAvailable} label={m.available} />
-      </div>
+      </form>
     </Modal>
   );
 }

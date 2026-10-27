@@ -1,4 +1,5 @@
 import type { AuthRepository, RegisterInput } from "@/features/auth/domain/auth.ports";
+import { getRestaurantBySlug, provisionRestaurant } from "@/features/restaurant";
 import type { AuthUser, Role, Session } from "@/features/auth/domain/session.entity";
 
 /**
@@ -52,12 +53,23 @@ export const mockAuthRepository: AuthRepository = {
     if (USERS.some((u) => sameEmail(u.email, input.email))) {
       throw new Error("email_taken");
     }
+    if (await getRestaurantBySlug(input.restaurant.slug)) {
+      throw new Error("slug_taken");
+    }
+    // Mirror the live `/auth/register`: create the restaurant with the account.
+    await provisionRestaurant({
+      name: input.restaurant.name,
+      slug: input.restaurant.slug,
+      ownerEmail: input.email.trim(),
+      plan: input.restaurant.plan,
+      status: "trial",
+    });
     const user: StoredUser = {
       id: nextId(),
       email: input.email.trim(),
       name: input.name.trim(),
       role: "owner",
-      restaurantId: input.restaurantId,
+      restaurantId: input.restaurant.slug,
       password: input.password,
     };
     USERS.push(user);

@@ -5,6 +5,7 @@ import {
   UtensilsCrossed,
   Palette,
   Store,
+  QrCode,
   Users,
   UserCog,
   CreditCard,
@@ -73,6 +74,9 @@ function useNavItems(caps: DashboardCaps): NavItem[] {
   }
   if (caps.settings) {
     items.push({ href: routes.dashboardRestaurant(locale), label: t.dashboard.restaurant, icon: Store });
+  }
+  if (caps.settings) {
+    items.push({ href: routes.dashboardQr(locale), label: t.dashboard.qrCode, icon: QrCode });
   }
   if (caps.staff) {
     items.push({ href: routes.dashboardStaff(locale), label: t.dashboard.staff, icon: Users });

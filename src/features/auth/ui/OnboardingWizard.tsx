@@ -15,18 +15,19 @@ import {
 import { useI18n } from "@/shared/i18n/I18nProvider";
 import { routes } from "@/shared/config/routes";
 import { MAX_MENU_LANGUAGES, SUPPORTED_LANGUAGES } from "@/shared/i18n/languages";
-import { Button, Card, Field, Input, BrandLogo } from "@/shared/ui";
+import { Button, Card, Field, Input, BrandLogo, ImageUpload } from "@/shared/ui";
 import {
   RESTAURANT_PLANS,
   type RestaurantPlan,
 } from "@/features/restaurant/domain/restaurant.entity";
 import { registerOwner } from "@/features/auth/application/registerOwner";
+import { PLAN_MONTHLY_PRICE_USD } from "@/features/billing";
 
 type StepId = "account" | "plan" | "restaurant" | "theme" | "menu" | "payment";
 const STEP_IDS: StepId[] = ["account", "plan", "restaurant", "theme", "menu", "payment"];
 
-/** Cosmetic monthly price per plan (mock checkout — nothing is charged). */
-const PLAN_PRICES: Record<RestaurantPlan, number> = { free: 0, pro: 49, enterprise: 99 };
+/** Monthly price per plan (shared with the billing page; nothing is charged yet). */
+const PLAN_PRICES: Record<RestaurantPlan, number> = PLAN_MONTHLY_PRICE_USD;
 const RECOMMENDED_PLAN: RestaurantPlan = "pro";
 
 /** Brand-color swatches for the theme step; stored as the restaurant's brandColor. */
@@ -529,13 +530,12 @@ function RestaurantStep({
             />
           </div>
         </Field>
-        <Field label={labels.logo} hint={labels.logoHint}>
-          <Input
-            value={state.logoUrl}
-            onChange={(e) => patch({ logoUrl: e.target.value })}
-            placeholder="https://…"
-          />
-        </Field>
+        <ImageUpload
+          label={labels.logo}
+          value={state.logoUrl}
+          folder="menunova/signup"
+          onChange={(logoUrl) => patch({ logoUrl })}
+        />
         <Field label={labels.languages} hint={labels.languagesHint}>
           <div className="flex flex-wrap gap-2">
             {LANG_CODES.map((code) => {

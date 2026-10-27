@@ -21,6 +21,8 @@ export function LivePreview({
   const labels: MenuViewLabels = {
     categories: tb.preview.categories,
     openNow: tb.preview.openNow,
+    closedNow: tb.preview.closedNow,
+    closedToday: tb.preview.closedToday,
     soldOut: tb.preview.soldOut,
     calories: tb.preview.calories,
     prepTime: tb.preview.prepTime,

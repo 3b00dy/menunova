@@ -14,7 +14,14 @@ import type { Locale } from "@/shared/i18n/config";
 import type { Dictionary } from "@/shared/i18n/getDictionary";
 import { routes } from "@/shared/config/routes";
 import { Badge, Card, CardBody, CardHeader, PageHeader } from "@/shared/ui";
-import { statusTone, type PlatformStats } from "@/features/restaurant";
+import { statusTone, type PlatformStats, type Restaurant } from "@/features/restaurant";
+
+/** A restaurant on a free trial, with its countdown (computed by the page). */
+export interface TrialRow {
+  restaurant: Restaurant;
+  daysLeft: number;
+  expired: boolean;
+}
 
 type Icon = ComponentType<{ className?: string }>;
 
@@ -28,12 +35,15 @@ export function SuperAdminOverview({
   stats,
   menuItems,
   menuCategories,
+  trials,
   dict,
   locale,
 }: {
   stats: PlatformStats;
   menuItems: number;
   menuCategories: number;
+  /** Trials ending soonest first — the operator's conversion follow-up list. */
+  trials: TrialRow[];
   dict: Dictionary["dashboard"];
   locale: Locale;
 }) {
@@ -97,6 +107,33 @@ export function SuperAdminOverview({
           </CardBody>
         </Card>
       </div>
+
+      {/* Trials ending soon — who to follow up with for trial→paid (BR-SA-01). */}
+      <Card>
+        <CardHeader className="text-sm font-semibold text-[rgb(var(--color-text))]">{p.trials.title}</CardHeader>
+        <CardBody className="p-0">
+          {trials.length === 0 ? (
+            <p className="px-4 py-6 text-sm text-[rgb(var(--color-muted))]">{p.trials.empty}</p>
+          ) : (
+            <ul className="flex flex-col divide-y divide-[rgb(var(--color-border))]">
+              {trials.map(({ restaurant: r, daysLeft, expired }) => (
+                <li key={r.id} className="flex flex-wrap items-center gap-3 px-4 py-3">
+                  <div className="min-w-0 flex-1">
+                    <div className="truncate font-medium text-[rgb(var(--color-text))]">{r.name}</div>
+                    <div className="truncate text-sm text-[rgb(var(--color-muted))]">
+                      {r.ownerEmail ?? `/${r.slug}`}
+                    </div>
+                  </div>
+                  <Badge tone="info">{planLabel(r.plan)}</Badge>
+                  <Badge tone={expired ? "danger" : daysLeft <= 2 ? "warning" : "neutral"}>
+                    {expired ? p.trials.ended : p.trials.daysLeft.replace("{days}", String(daysLeft))}
+                  </Badge>
+                </li>
+              ))}
+            </ul>
+          )}
+        </CardBody>
+      </Card>
 
       {/* Recent restaurants */}
       <Card>

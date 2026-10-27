@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type CSSProperties, type ReactNode } from "react";
+import { useState, useSyncExternalStore, type CSSProperties, type ReactNode } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { Clock, Flame, Phone, MapPin, Globe, X, ArrowLeft, Sparkles } from "lucide-react";
 import {
@@ -10,6 +10,7 @@ import {
   SHADOW_VALUES,
 } from "@/shared/theme/tenant-config";
 import { cn } from "@/shared/utils/cn";
+import { isOpenAt, type DayHours } from "@/shared/theme/restaurant-info";
 import {
   itemsInCategory,
   promotedItems,
@@ -254,21 +255,73 @@ function MenuHeader({
         </div>
       </div>
       <div className="flex flex-wrap items-center gap-x-3 gap-y-1 px-5 pb-4 text-xs">
-        {(restaurant.hoursOpen || restaurant.hoursClose) && (
-          <span className="inline-flex items-center gap-1.5" style={{ color: "var(--pv-secondary)" }}>
-            <Clock className="h-3.5 w-3.5" />
-            {restaurant.hoursOpen} – {restaurant.hoursClose}
-          </span>
+        {restaurant.weeklyHours ? (
+          <OpeningStatus hours={restaurant.weeklyHours} labels={labels} />
+        ) : (
+          // Static hours (sample menu only) — no badge unless hours exist.
+          (restaurant.hoursOpen || restaurant.hoursClose) && (
+            <>
+              <span className="inline-flex items-center gap-1.5" style={{ color: "var(--pv-secondary)" }}>
+                <Clock className="h-3.5 w-3.5" />
+                {restaurant.hoursOpen} – {restaurant.hoursClose}
+              </span>
+              <StatusBadge open label={labels.openNow} />
+            </>
+          )
         )}
-        <span
-          className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 font-medium"
-          style={{ backgroundColor: "var(--pv-primary-soft)", color: "var(--pv-primary)" }}
-        >
-          <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: "var(--pv-primary)" }} />
-          {labels.openNow}
-        </span>
       </div>
     </header>
+  );
+}
+
+/* ------------------------------ opening hours ----------------------------- */
+
+const subscribeMinute = (onChange: () => void) => {
+  const id = setInterval(onChange, 30_000);
+  return () => clearInterval(id);
+};
+const currentMinute = () => Math.floor(Date.now() / 60_000);
+const noMinuteOnServer = () => null;
+
+/**
+ * Today's hours + an "Open now / Closed now" badge from the restaurant's weekly
+ * hours (BRD BR-BR-06). Uses the guest's device clock — they're at or near the
+ * restaurant — so it renders only in the browser (the server has no guest
+ * clock; this avoids a hydration mismatch) and refreshes every half minute.
+ */
+function OpeningStatus({ hours, labels }: { hours: DayHours[]; labels: MenuViewLabels }) {
+  const minute = useSyncExternalStore(subscribeMinute, currentMinute, noMinuteOnServer);
+  if (minute === null) return null;
+  const now = new Date(minute * 60_000);
+  const today = hours[now.getDay()];
+  const open = isOpenAt(hours, now);
+  return (
+    <>
+      <span className="inline-flex items-center gap-1.5" style={{ color: "var(--pv-secondary)" }}>
+        <Clock className="h-3.5 w-3.5" />
+        <span dir="ltr">{today.closed ? labels.closedToday : `${today.open} – ${today.close}`}</span>
+      </span>
+      <StatusBadge open={open === true} label={open ? labels.openNow : labels.closedNow} />
+    </>
+  );
+}
+
+function StatusBadge({ open, label }: { open: boolean; label: string }) {
+  return (
+    <span
+      className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 font-medium"
+      style={
+        open
+          ? { backgroundColor: "var(--pv-primary-soft)", color: "var(--pv-primary)" }
+          : { backgroundColor: "var(--pv-surface)", color: "var(--pv-secondary)" }
+      }
+    >
+      <span
+        className="h-1.5 w-1.5 rounded-full"
+        style={{ backgroundColor: open ? "var(--pv-primary)" : "var(--pv-secondary)" }}
+      />
+      {label}
+    </span>
   );
 }
 
@@ -791,7 +844,11 @@ function ModalAddButton({ buttonStyle, label }: { buttonStyle: ButtonStyle; labe
 /* --------------------------------- footer -------------------------------- */
 
 function MenuFooter({ restaurant }: { restaurant: MenuRestaurant }) {
-  const { phone, address, socials } = restaurant;
+  const { phone, address, mapUrl, socials } = restaurant;
+  // Address opens the phone's maps app (BRD US-BR-03): the saved map link, else a search.
+  const mapsHref =
+    mapUrl ||
+    (address ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}` : "");
   if (!phone && !address && (!socials || socials.length === 0)) return null;
 
   return (
@@ -804,10 +861,15 @@ function MenuFooter({ restaurant }: { restaurant: MenuRestaurant }) {
           </a>
         )}
         {address && (
-          <span className="inline-flex items-center gap-2">
+          <a
+            href={mapsHref}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 hover:opacity-80"
+          >
             <MapPin className="h-3.5 w-3.5 shrink-0" />
             {address}
-          </span>
+          </a>
         )}
       </div>
       {socials && socials.length > 0 && (
@@ -816,6 +878,8 @@ function MenuFooter({ restaurant }: { restaurant: MenuRestaurant }) {
             <a
               key={social.type}
               href={social.href}
+              target="_blank"
+              rel="noopener noreferrer"
               aria-label={social.label}
               className="grid h-10 w-10 place-items-center transition-colors hover:opacity-80"
               style={{

@@ -3,7 +3,7 @@
 import type { Locale } from "@/shared/i18n/config";
 import type { Dictionary } from "@/shared/i18n/getDictionary";
 import { MAX_MENU_LANGUAGES } from "@/shared/i18n/languages";
-import { Input } from "@/shared/ui";
+import { ImageUpload } from "@/shared/ui";
 import { cn } from "@/shared/utils/cn";
 import {
   type ThemeConfig,
@@ -34,13 +34,15 @@ export interface SettingsPanelProps {
   applyPreset: (preset: AdminPreset) => void;
   tb: TB;
   locale: Locale;
+  /** Restaurant slug — groups uploaded images per restaurant. */
+  slug: string;
 }
 
-export function SettingsPanel({ config, update, applyPreset, tb, locale }: SettingsPanelProps) {
+export function SettingsPanel({ config, update, applyPreset, tb, locale, slug }: SettingsPanelProps) {
   return (
     <div className="flex flex-col gap-4">
       <PresetsSection tb={tb} locale={locale} onApply={applyPreset} />
-      <BrandAssetsSection tb={tb} config={config} update={update} />
+      <BrandAssetsSection tb={tb} config={config} update={update} slug={slug} />
       <LanguagesSection tb={tb} config={config} update={update} />
       <BrandColorsSection tb={tb} config={config} update={update} />
       <TypographySection tb={tb} config={config} update={update} />
@@ -100,24 +102,27 @@ function BrandAssetsSection({
   tb,
   config,
   update,
+  slug,
 }: {
   tb: TB;
   config: ThemeConfig;
   update: UpdateConfig;
+  slug: string;
 }) {
   return (
     <SectionCard title={tb.sections.brandAssets}>
-      <div className="flex flex-col gap-3">
-        <LabeledInput
+      <div className="flex flex-col gap-4">
+        <ImageUpload
           label={tb.fields.logoUrl}
           value={config.brandAssets.logoUrl}
-          placeholder="https://…/logo.png"
+          folder={`menunova/${slug}`}
           onChange={(v) => update("brandAssets", { logoUrl: v })}
         />
-        <LabeledInput
+        <ImageUpload
           label={tb.fields.coverImageUrl}
           value={config.brandAssets.coverImageUrl}
-          placeholder="https://…/cover.jpg"
+          folder={`menunova/${slug}`}
+          shape="wide"
           onChange={(v) => update("brandAssets", { coverImageUrl: v })}
         />
       </div>
@@ -321,29 +326,6 @@ function Control({ label, children }: { label: string; children: React.ReactNode
       <span className="text-xs font-medium text-[rgb(var(--color-muted))]">{label}</span>
       {children}
     </div>
-  );
-}
-
-function LabeledInput({
-  label,
-  value,
-  placeholder,
-  onChange,
-}: {
-  label: string;
-  value: string;
-  placeholder?: string;
-  onChange: (value: string) => void;
-}) {
-  return (
-    <label className="flex flex-col gap-1.5">
-      <span className="text-xs font-medium text-[rgb(var(--color-muted))]">{label}</span>
-      <Input
-        value={value}
-        placeholder={placeholder}
-        onChange={(e) => onChange(e.target.value)}
-      />
-    </label>
   );
 }
 

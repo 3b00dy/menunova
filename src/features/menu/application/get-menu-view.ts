@@ -1,4 +1,5 @@
 import type { MenuView } from "@/features/menu/domain/menu-view";
+import type { RestaurantInfo } from "@/shared/theme/restaurant-info";
 import { getRestaurantBySlug } from "@/features/restaurant";
 import { MOCK_MENU_VIEW } from "@/features/menu/infrastructure/menu-view.mock";
 import { buildMenuView } from "@/features/menu/infrastructure/menu-view.mapper";
@@ -20,6 +21,8 @@ export async function getMenuView(
   slug: string,
   locale: string = "en",
   fallback?: string,
+  /** Restaurant info from its theme settings (address, hours, phone, socials). */
+  info?: RestaurantInfo,
 ): Promise<MenuView | null> {
   if (slug === "demo" || slug === "preview") return MOCK_MENU_VIEW;
 
@@ -27,5 +30,5 @@ export async function getMenuView(
   if (!restaurant) return null;
 
   const menu = await menuRepository.getByRestaurantSlug(slug).catch(() => null);
-  return buildMenuView({ menu, restaurantName: restaurant.name, locale, fallback });
+  return buildMenuView({ menu, restaurantName: restaurant.name, locale, fallback, info });
 }

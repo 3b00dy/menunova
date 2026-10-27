@@ -8,12 +8,14 @@ import { routes } from "@/shared/config/routes";
 import type { Locale } from "@/shared/i18n/config";
 
 /** Which dashboard section the picker scopes — maps to the route it pushes to. */
-export type PickerScope = "menu" | "theme" | "settings";
+export type PickerScope = "menu" | "theme" | "settings" | "billing" | "qr";
 
 const ROUTE_FOR: Record<PickerScope, (locale: Locale) => string> = {
   menu: routes.dashboardMenu,
   theme: routes.dashboardTheme,
   settings: routes.dashboardRestaurant,
+  billing: routes.dashboardBilling,
+  qr: routes.dashboardQr,
 };
 
 /**

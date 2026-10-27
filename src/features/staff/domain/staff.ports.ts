@@ -6,7 +6,8 @@ import type { StaffDraft, StaffMember, StaffPatch } from "@/features/staff/domai
  * enforced in the application layer via `requirePermission("staff:manage")`.
  */
 export interface StaffRepository {
-  list(restaurantId: string): Promise<StaffMember[]>;
+  /** Requires a bearer token on the live backend (401 without one). */
+  list(restaurantId: string, token: string): Promise<StaffMember[]>;
   create(restaurantId: string, draft: StaffDraft, token: string): Promise<StaffMember>;
   update(id: string, patch: StaffPatch, token: string): Promise<StaffMember>;
   remove(id: string, token: string): Promise<void>;

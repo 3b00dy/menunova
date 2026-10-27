@@ -20,6 +20,7 @@ export {
 } from "@/features/restaurant/application/restaurant-actions";
 export { provisionRestaurant } from "@/features/restaurant/application/provision-restaurant";
 export { provisionRestaurantLanguages } from "@/features/restaurant/application/provision-settings";
+export { provisionRestaurantBranding } from "@/features/restaurant/application/provision-branding";
 export { RestaurantsManager } from "@/features/restaurant/ui/RestaurantsManager";
 
 // Settings (languages)
@@ -27,7 +28,9 @@ export type { RestaurantSettings } from "@/features/restaurant/domain/restaurant
 export { getRestaurantSettings } from "@/features/restaurant/application/get-restaurant-settings";
 export { updateRestaurantLanguages } from "@/features/restaurant/application/update-restaurant-languages";
 export { LanguageSettingsForm } from "@/features/restaurant/ui/LanguageSettingsForm";
+export { RestaurantInfoForm } from "@/features/restaurant/ui/RestaurantInfoForm";
 
 // Theme (per-restaurant public-menu design)
 export { getRestaurantTheme } from "@/features/restaurant/application/get-restaurant-theme";
 export { saveRestaurantTheme } from "@/features/restaurant/application/save-restaurant-theme";
+export { saveRestaurantInfo } from "@/features/restaurant/application/save-restaurant-info";

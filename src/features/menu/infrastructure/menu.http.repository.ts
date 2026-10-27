@@ -27,10 +27,12 @@ import {
  * directly — it is wired in at the composition edge (see `menu.repository.ts`).
  */
 export class HttpMenuRepository implements MenuRepository {
-  async getByRestaurantSlug(slug: string): Promise<Menu | null> {
+  async getByRestaurantSlug(slug: string, options?: { fresh?: boolean }): Promise<Menu | null> {
     const dto = await httpClient.get<MenuDto>(
       API_ENDPOINTS.restaurants.menu(slug),
-      { next: { revalidate: 60, tags: [`menu:${slug}`] } },
+      options?.fresh
+        ? { cache: "no-store" }
+        : { next: { revalidate: 60, tags: [`menu:${slug}`] } },
     );
     return toMenu(dto);
   }

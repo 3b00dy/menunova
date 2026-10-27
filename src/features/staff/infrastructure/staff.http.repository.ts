@@ -30,8 +30,10 @@ function toStaff(dto: StaffDto): StaffMember {
 }
 
 export class HttpStaffRepository implements StaffRepository {
-  async list(restaurantId: string): Promise<StaffMember[]> {
-    const dtos = await httpClient.get<StaffDto[]>(API_ENDPOINTS.restaurants.staff(restaurantId));
+  async list(restaurantId: string, token: string): Promise<StaffMember[]> {
+    const dtos = await httpClient.get<StaffDto[]>(API_ENDPOINTS.restaurants.staff(restaurantId), {
+      token,
+    });
     return dtos.map(toStaff);
   }
 

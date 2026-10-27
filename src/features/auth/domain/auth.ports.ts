@@ -1,12 +1,16 @@
 import type { Session } from "@/features/auth/domain/session.entity";
+import type { RestaurantPlan } from "@/features/restaurant";
 
-/** Fields needed to register a new owner + their restaurant binding. */
+/**
+ * Self-serve signup: the new owner AND their restaurant. `register` creates
+ * both (the live backend does it in one `/auth/register` call), so callers never
+ * provision the restaurant separately.
+ */
 export interface RegisterInput {
   email: string;
   password: string;
   name: string;
-  /** The restaurant the new owner is bound to (its slug in this app's convention). */
-  restaurantId: string;
+  restaurant: { name: string; slug: string; plan: RestaurantPlan };
 }
 
 /**
@@ -16,6 +20,7 @@ export interface RegisterInput {
  */
 export interface AuthRepository {
   login(email: string, password: string): Promise<Session>;
+  /** Create the owner + restaurant; throws `Error(code)` (`email_taken`, `slug_taken`, …). */
   register(input: RegisterInput): Promise<Session>;
   /** Validate a raw session token; null if invalid/expired. */
   verify(token: string): Promise<Session | null>;

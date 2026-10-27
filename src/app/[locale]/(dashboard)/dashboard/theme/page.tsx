@@ -39,7 +39,7 @@ export default async function ThemeBuilderPage({
   }
 
   const isSuperAdmin = can(session.user, "restaurants:manage");
-  const restaurants = isSuperAdmin ? await listRestaurants() : [];
+  const restaurants = isSuperAdmin ? await listRestaurants(session.token) : [];
 
   let slug: string | null;
   if (isSuperAdmin) {

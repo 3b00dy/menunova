@@ -77,12 +77,14 @@ export default async function PublicMenuPage({
     supported: settings.supportedLanguages,
     defaultLanguage: settings.defaultLanguage,
   });
-  const menu = await getMenuView(restaurantSlug, language, settings.defaultLanguage);
+  const menu = await getMenuView(restaurantSlug, language, settings.defaultLanguage, theme.info);
   if (!menu) notFound();
 
   const labels: MenuViewLabels = {
     categories: t.menu.categories,
     openNow: t.menu.openNow,
+    closedNow: t.menu.closedNow,
+    closedToday: t.menu.closedToday,
     soldOut: t.menu.soldOut,
     calories: t.menu.calories,
     prepTime: t.menu.prepTime,
